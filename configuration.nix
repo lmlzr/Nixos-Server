@@ -13,7 +13,7 @@
       ./services/karakeep.nix
       ./services/mealie.nix
       ./services/syncthing.nix
-      ./vm-setup.nix
+      ./services/vm-setup.nix
     ];
 
   networking.hostName = "neotokyo"; # Define your hostname.
