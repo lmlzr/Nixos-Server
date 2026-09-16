@@ -25,7 +25,7 @@
   ];
 
   # Benutzer darf libvirt verwalten
-  users.users.lme.extraGroups = [
+  users.users.lmlzr.extraGroups = [
     "libvirtd"
   ];
 
