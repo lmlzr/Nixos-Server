@@ -23,5 +23,6 @@
     libbluray
     mesa
     sudo
+    kitty
   ];
 }

@@ -5,20 +5,22 @@
     backend = "docker";
 
     containers.portainer = {
-      image = "portainer/portainer-ce:latest";
+      image = "portainer/portainer-ce:2.21.4";
 
       ports = [
-        "9443:9443"
+        "127.0.0.1:9443:9443"
       ];
 
       volumes = [
         "/var/run/docker.sock:/var/run/docker.sock"
-        "portainer_data:/data"
+        "/var/lib/portainer:/data"
       ];
 
-      extraOptions = [
-        "--restart=unless-stopped"
-      ];
+      autoStart = true;
     };
   };
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/portainer 0700 root root -"
+  ];
 }
