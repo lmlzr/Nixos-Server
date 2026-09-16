@@ -9,7 +9,7 @@
 
       ./containers/portainer.nix      
       ./services/jellyfin.nix
-      ./services/homeassistant.nix
+      ./services/home-assistant.nix
       ./services/karakeep.nix
       ./services/mealie.nix
       ./services/syncthing.nix
