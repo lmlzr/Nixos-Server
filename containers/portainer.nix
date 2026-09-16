@@ -1,23 +1,24 @@
 { config, pkgs, ... }:
 
 {
-  virtualisation.oci-containers.containers.portainer = {
-    image = "portainer/portainer-ce:lts";
+  virtualisation.oci-containers = {
+    backend = "docker";
 
-    ports = [
-      "8000:8000"
-      "9443:9443"
-    ];
+    containers.portainer = {
+      image = "portainer/portainer-ce:latest";
 
-    volumes = [
-      "/var/run/docker.sock:/var/run/docker.sock"
-      "portainer_data:/data"
-    ];
+      ports = [
+        "9443:9443"
+      ];
 
-    autoStart = true;
+      volumes = [
+        "/var/run/docker.sock:/var/run/docker.sock"
+        "portainer_data:/data"
+      ];
 
-    extraOptions = [
-      "--restart=always"
-    ];
+      extraOptions = [
+        "--restart=unless-stopped"
+      ];
+    };
   };
 }
