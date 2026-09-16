@@ -13,6 +13,11 @@
     smartmontools
   ];
 
+  fileSystems."/mnt/tb1" = {
+    device = "TB1";
+    fsType = "zfs";
+  };
+
   services.zfs.autoScrub = {
     enable = true;
     interval = "monthly";
