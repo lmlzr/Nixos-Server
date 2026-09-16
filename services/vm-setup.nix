@@ -19,6 +19,8 @@
     openFirewall = true;
   };
 
+  security.pam.services.cockpit = {};
+
   environment.systemPackages = with pkgs; [
     qemu_kvm
     libvirt
