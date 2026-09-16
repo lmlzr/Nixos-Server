@@ -8,7 +8,8 @@
       image = "portainer/portainer-ce:2.21.4";
 
       ports = [
-        "127.0.0.1:9443:9443"
+        "9443:9443"
+        "8000:8000"
       ];
 
       volumes = [
