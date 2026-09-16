@@ -1,0 +1,25 @@
+{
+  description = "Main flake";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  };
+
+  outputs = { self, nixpkgs, preload-ng, ... }@inputs:
+  let
+    system = "x86_64-linux";
+  in
+  {
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+      inherit system;
+
+      specialArgs = {
+        inherit inputs;
+      };
+
+      modules = [
+        ./configuration.nix
+      ];
+    };
+  };
+}

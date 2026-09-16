@@ -1,0 +1,64 @@
+{ config, pkgs, ... }:
+
+{
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+      ./modules/software.nix
+      ./modules/systemdboot.nix
+
+      ./containers/portainer.nix      
+      ./services/jellyfin.nix
+    ];
+
+  networking.hostName = "neotokyo"; # Define your hostname.
+  # Enable networking
+  networking.networkmanager.enable = true;
+  # Set your time zone.
+  time.timeZone = "Europe/Berlin";
+  # Select internationalisation properties.
+  i18n.defaultLocale = "de_DE.UTF-8";
+
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "de_DE.UTF-8";
+    LC_IDENTIFICATION = "de_DE.UTF-8";
+    LC_MEASUREMENT = "de_DE.UTF-8";
+    LC_MONETARY = "de_DE.UTF-8";
+    LC_NAME = "de_DE.UTF-8";
+    LC_NUMERIC = "de_DE.UTF-8";
+    LC_PAPER = "de_DE.UTF-8";
+    LC_TELEPHONE = "de_DE.UTF-8";
+    LC_TIME = "de_DE.UTF-8";
+  };
+  # Configure console keymap
+  console.keyMap = "de";
+  # Enable sound with pipewire.
+  security.rtkit.enable = true;
+
+  # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.users.lmlzr = {
+    isNormalUser = true;
+    description = "Leon Melzer";
+    extraGroups = [ "networkmanager" "wheel" "libvirtd" "kvm" "video" "cdrom" "waydroid" "sudo" ];
+    packages = with pkgs; [
+    ];
+  };
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+  # Enable the OpenSSH daemon.
+  services.openssh.enable = true;
+
+  # Open ports in the firewall.
+  # networking.firewall.allowedTCPPorts = [ ... ];
+  # networking.firewall.allowedUDPPorts = [ ... ];
+  # Or disable the firewall altogether.
+  # networking.firewall.enable = false;
+
+#VM zeug:
+virtualisation.libvirtd.enable = true;
+virtualisation.spiceUSBRedirection.enable = true;
+
+
+  system.stateVersion = "25.05"; # Did you read the comment?
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+}
