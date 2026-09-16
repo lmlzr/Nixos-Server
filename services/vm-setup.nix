@@ -17,11 +17,12 @@
     enable = true;
     port = 9090;
     openFirewall = true;
-    settings = {
-      WebService = {
-        Origins = "https://neotokyo:9090 https://neotokyo.local:9090 https://192.168.122.157:9090 https://localhost:9090";
-      };
-    };
+
+    allowed-origins = [
+      "https://neotokyo:9090"
+      "https://neotokyo.local:9090"
+      "https://192.168.122.157:9090"
+    ];
   };
 
   environment.systemPackages = with pkgs; [
