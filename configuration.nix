@@ -2,7 +2,7 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
       ./hardware-configuration.nix
       ./modules/software.nix
       ./modules/systemdboot.nix
@@ -12,7 +12,8 @@
       ./users/lmlzr.nix
 
       ./containers/portainer.nix
-      ./containers/firefox.nix   
+      ./containers/firefox.nix
+
       ./services/jellyfin.nix
       ./services/home-assistant.nix
       ./services/karakeep.nix
@@ -21,6 +22,7 @@
       ./services/vm-setup.nix
       ./services/docker.nix
       ./services/stirling-pdf.nix
+      ./services/audiobookshelf.nix
     ];
 
   networking.hostName = "neotokyo"; # Define your hostname.
@@ -44,24 +46,11 @@
   };
   # Configure console keymap
   console.keyMap = "de";
-  # Enable sound with pipewire.
-  security.rtkit.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-#VM zeug:
-virtualisation.libvirtd.enable = true;
-virtualisation.spiceUSBRedirection.enable = true;
-
-
-  system.stateVersion = "26.11"; # Did you read the comment?
+  system.stateVersion = "26.11"; 
 }
