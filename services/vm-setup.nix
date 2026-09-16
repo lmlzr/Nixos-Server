@@ -19,7 +19,7 @@
     openFirewall = true;
     settings = {
       WebService = {
-        Origins = "https://192.168.122.157:9090";
+        Origins = "https://neotokyo:9090 https://neotokyo.local:9090 https://192.168.122.157:9090 https://localhost:9090";
       };
     };
   };
