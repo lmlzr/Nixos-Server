@@ -8,7 +8,7 @@
       ./modules/systemdboot.nix
 
       ./containers/portainer.nix
-      ./container/firefox.nix   
+      ./containers/firefox.nix   
       ./services/jellyfin.nix
       ./services/home-assistant.nix
       ./services/karakeep.nix
