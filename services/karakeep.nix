@@ -1,11 +1,12 @@
 { config, pkgs, ... }:
 
 {
-    fileSystems."/var/lib/karakeep" = {
+  fileSystems."/var/lib/karakeep" = {
     device = "/mnt/tb1/server/services/karakeep";
+    fsType = "none";
     options = [ "bind" ];
   };
-  
+
   services.karakeep = {
     enable = true;
 
