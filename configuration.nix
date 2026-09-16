@@ -9,6 +9,11 @@
 
       ./containers/portainer.nix      
       ./services/jellyfin.nix
+      ./services/homeassistant.nix
+      ./services/karakeep.nix
+      ./services/mealie.nix
+      ./services/syncthing.nix
+      ./vm-setup.nix
     ];
 
   networking.hostName = "neotokyo"; # Define your hostname.
@@ -59,6 +64,5 @@ virtualisation.libvirtd.enable = true;
 virtualisation.spiceUSBRedirection.enable = true;
 
 
-  system.stateVersion = "25.05"; # Did you read the comment?
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  system.stateVersion = "26.11"; # Did you read the comment?
 }

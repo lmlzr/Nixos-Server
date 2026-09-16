@@ -14,6 +14,5 @@
       Type = "oneshot";
       ExecStart = ''/bin/sh -c "echo 10 > /proc/irq/112/smp_affinity"'';
     };
-
-
+  };
 }
