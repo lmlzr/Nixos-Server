@@ -1,6 +1,9 @@
 { config, pkgs, ... }:
 
 {
+  
+virtualisation.spiceUSBRedirection.enable = true;
+
   # Virtualisierung
   virtualisation.libvirtd = {
     enable = true;
