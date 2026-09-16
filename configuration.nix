@@ -7,6 +7,8 @@
       ./modules/software.nix
       ./modules/systemdboot.nix
 
+      ./Hardware/hdds.nix
+
       ./containers/portainer.nix
       ./containers/firefox.nix   
       ./services/jellyfin.nix
@@ -43,14 +45,6 @@
   # Enable sound with pipewire.
   security.rtkit.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.lmlzr = {
-    isNormalUser = true;
-    description = "Leon Melzer";
-    extraGroups = [ "networkmanager" "wheel" "libvirtd" "kvm" "video" "cdrom" "waydroid" "sudo" ];
-    packages = with pkgs; [
-    ];
-  };
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   # Enable the OpenSSH daemon.
