@@ -10,7 +10,7 @@
     system = "x86_64-linux";
   in
   {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.neotokyo = nixpkgs.lib.nixosSystem {
       inherit system;
 
       specialArgs = {
