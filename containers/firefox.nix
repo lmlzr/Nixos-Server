@@ -14,36 +14,20 @@
         "4045:3001"
       ];
 
-      environment = {
-        PUID = "1000";
-        PGID = "1000";
-        NVIDIA_DRIVER_CAPABILITIES = "all";
-        DISPLAY = ":1";
-        START_DOCKER = "true";
-        PIXELFLUX_WAYLAND = "true";
-        SELKIES_ENCODER = "x264enc,jpeg";
-        DISABLE_ZINK = "false";
-        DISABLE_DRI3 = "false";
-        TITLE = "Firefox";
-      };
-
       volumes = [
         "/portainer/Files/AppData/Config/firefox:/config"
       ];
 
-      autoStart = true;
+      environment = {
+        PUID = "1000";
+        PGID = "1000";
+        TITLE = "Firefox";
+        NVIDIA_DRIVER_CAPABILITIES = "all";
+      };
 
-      extraOptions = [
-        "--restart=unless-stopped"
-        "--runtime=nvidia"
-      ];
+      autoStart = true;
 
     };
 
   };
-
-  systemd.tmpfiles.rules = [
-    "d /portainer/Files/AppData/Config/firefox 0755 root root -"
-  ];
-
 }
