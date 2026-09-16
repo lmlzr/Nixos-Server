@@ -7,7 +7,8 @@
       ./modules/software.nix
       ./modules/systemdboot.nix
 
-      ./containers/portainer.nix      
+      ./containers/portainer.nix
+      ./container/firefox.nix   
       ./services/jellyfin.nix
       ./services/home-assistant.nix
       ./services/karakeep.nix
@@ -15,6 +16,7 @@
       ./services/syncthing.nix
       ./services/vm-setup.nix
       ./services/docker.nix
+      ./services/stirling-pdf.nix
     ];
 
   networking.hostName = "neotokyo"; # Define your hostname.
