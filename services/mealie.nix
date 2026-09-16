@@ -9,12 +9,12 @@
 
     settings = {
       TZ = "Europe/Berlin";
-      BASE_URL = "http://192.168.1.100:9925";
+      BASE_URL = "http://127.0.0.1:9925";
 
       ALLOW_SIGNUP = "true";
 
       DB_ENGINE = "sqlite";
-      DATA_DIR = "/var/lib/mealie";
+      DATA_DIR = "/mnt/tb1/server/services/mealie";
     };
   };
 
