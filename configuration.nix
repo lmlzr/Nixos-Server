@@ -14,6 +14,7 @@
       ./services/mealie.nix
       ./services/syncthing.nix
       ./services/vm-setup.nix
+      ./services/docker.nix
     ];
 
   networking.hostName = "neotokyo"; # Define your hostname.
