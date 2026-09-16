@@ -2,7 +2,7 @@
 
 {
   fileSystems."/var/lib/karakeep" = {
-    device = "/mnt/tb1/server/services/karakeep";
+    device = "/mnt/tb1/server/services";
     fsType = "none";
     options = [ "bind" ];
   };
