@@ -5,8 +5,8 @@
     image = "linuxserver/firefox:latest";
 
     ports = [
-      "4044:3000"
-      "4045:3001"
+      "8087:3000"
+      "8088:3001"
     ];
 
     environment = {
