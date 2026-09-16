@@ -11,6 +11,11 @@
     meilisearch.enable = true;
     browser.enable = true;
 
+    fileSystems."/var/lib/karakeep" = {
+      device = "/mnt/tb1/server/services/karakeep";
+      options = [ "bind" ];
+    };
+
     extraEnvironment = {
       # Adresse deiner Karakeep-Instanz
       NEXTAUTH_URL = "http://127.0.0.1:3000";

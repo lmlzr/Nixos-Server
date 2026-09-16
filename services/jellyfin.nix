@@ -6,7 +6,7 @@
 
     openFirewall = true;
 
-    dataDir = "/var/lib/jellyfin";
+    dataDir = "/mnt/tb1/server/services/jellyfin";
 
     cacheDir = "/var/cache/jellyfin";
 
