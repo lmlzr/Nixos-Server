@@ -46,11 +46,13 @@
   };
   # Configure console keymap
   console.keyMap = "de";
+  # Enable sound with pipewire.
+  security.rtkit.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
-  system.stateVersion = "26.11"; 
+  system.stateVersion = "26.11"; # Did you read the comment?
 }
