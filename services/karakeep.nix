@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+    fileSystems."/var/lib/karakeep" = {
+    device = "/mnt/tb1/server/services/karakeep";
+    options = [ "bind" ];
+  };
+  
   services.karakeep = {
     enable = true;
 
@@ -10,11 +15,6 @@
     # - Chromium für Crawling/Screenshots
     meilisearch.enable = true;
     browser.enable = true;
-
-    fileSystems."/var/lib/karakeep" = {
-      device = "/mnt/tb1/server/services/karakeep";
-      options = [ "bind" ];
-    };
 
     extraEnvironment = {
       # Adresse deiner Karakeep-Instanz
