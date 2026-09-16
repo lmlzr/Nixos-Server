@@ -9,6 +9,8 @@
 
       ./Hardware/hdds.nix
 
+      ./users/lmlzr.nix
+      
       ./containers/portainer.nix
       ./containers/firefox.nix   
       ./services/jellyfin.nix
@@ -44,7 +46,7 @@
   console.keyMap = "de";
   # Enable sound with pipewire.
   security.rtkit.enable = true;
-
+y
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   # Enable the OpenSSH daemon.
