@@ -13,7 +13,7 @@
 
     extraEnvironment = {
       # Adresse deiner Karakeep-Instanz
-      NEXTAUTH_URL = "http://192.168.1.100:3000";
+      NEXTAUTH_URL = "http://127.0.0.1:3000";
 
       # Neue Registrierungen erlauben
       DISABLE_SIGNUPS = "false";
