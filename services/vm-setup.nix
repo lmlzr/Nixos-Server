@@ -17,9 +17,12 @@
     enable = true;
     port = 9090;
     openFirewall = true;
+    settings = {
+      WebService = {
+        Origins = "https://192.168.122.157:9090";
+      };
+    };
   };
-
-  security.pam.services.cockpit = {};
 
   environment.systemPackages = with pkgs; [
     qemu_kvm
