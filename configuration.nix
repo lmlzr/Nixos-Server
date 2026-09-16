@@ -21,7 +21,6 @@
       ./services/vm-setup.nix
       ./services/docker.nix
       ./services/stirling-pdf.nix
-      ./sevices/steam-lancache.prefill.nix
     ];
 
   networking.hostName = "neotokyo"; # Define your hostname.
