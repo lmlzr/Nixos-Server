@@ -24,5 +24,6 @@
     mesa
     sudo
     kitty
+    steam-lancache-prefill
   ];
 }
