@@ -11,10 +11,8 @@
 
     "scsi_mod.use_blk_mq=1"
     "dm_mod.use_blk_mq=Y"
-    "mitigations=off"
     "zswap.enabled=1"
     "iommu=pt"
-    "systemd.unified_cgroup_hierarchy=0"
   ];
 
 
