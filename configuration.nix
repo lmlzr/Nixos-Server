@@ -6,6 +6,7 @@
       ./hardware-configuration.nix
       ./modules/software.nix
       ./modules/systemdboot.nix
+      ./modules/links.nix
 
       ./Hardware/hdds.nix
 
@@ -19,18 +20,16 @@
       ./services/karakeep.nix
       ./services/mealie.nix
       ./services/syncthing.nix
-      ./services/vm-setup.nix
+      # ./services/vm-setup.nix # dont need it my router is a vm host
       ./services/docker.nix
       ./services/stirling-pdf.nix
       ./services/audiobookshelf.nix
+      ./services/lancache.nix 
     ];
 
-  networking.hostName = "neotokyo"; # Define your hostname.
-  # Enable networking
+  networking.hostName = "neotokyo";
   networking.networkmanager.enable = true;
-  # Set your time zone.
   time.timeZone = "Europe/Berlin";
-  # Select internationalisation properties.
   i18n.defaultLocale = "de_DE.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -44,15 +43,9 @@
     LC_TELEPHONE = "de_DE.UTF-8";
     LC_TIME = "de_DE.UTF-8";
   };
-  # Configure console keymap
   console.keyMap = "de";
-  # Enable sound with pipewire.
   security.rtkit.enable = true;
-
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-
-  system.stateVersion = "26.11"; # Did you read the comment?
+  system.stateVersion = "26.11";
 }

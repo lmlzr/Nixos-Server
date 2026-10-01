@@ -3,9 +3,7 @@
 {
   services.home-assistant = {
     enable = true;
-
-    configDir = "/mnt/tb1/server/services/homeassistant";
-
+    
     extraComponents = [
       "default_config"
       "esphome"

@@ -6,10 +6,6 @@
 
     openFirewall = true;
 
-    dataDir = "/mnt/tb1/server/services/jellyfin";
-
-    cacheDir = "/var/cache/jellyfin";
-
     user = "jellyfin";
     group = "jellyfin";
   };

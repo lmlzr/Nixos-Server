@@ -13,7 +13,7 @@
     smartmontools
   ];
 
-  fileSystems."/mnt/tb1" = {
+  fileSystems."/mnt/TB1" = {
     device = "TB1";
     fsType = "zfs";
   };
