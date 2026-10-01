@@ -31,6 +31,9 @@ virtualisation.spiceUSBRedirection.enable = true;
   environment.systemPackages = with pkgs; [
     qemu_kvm
     libvirt
+    qemu
+    kvmtool
+
   ];
 
   # Benutzer darf libvirt verwalten

@@ -16,8 +16,6 @@
     rar
     fzf
     htop
-    qemu
-    kvmtool
     bat
     ffmpeg
     libbluray
