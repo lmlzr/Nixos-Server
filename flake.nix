@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    lancache-nix.url = "github:menixator/lancache.nix";
   };
 
   outputs = { self, nixpkgs, ... }@inputs:
@@ -19,6 +20,7 @@
 
       modules = [
         ./configuration.nix
+        inputs.lancache-nix.nixosModules.default
       ];
     };
   };

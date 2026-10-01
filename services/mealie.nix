@@ -14,7 +14,6 @@
       ALLOW_SIGNUP = "true";
 
       DB_ENGINE = "sqlite";
-      DATA_DIR = "/mnt/tb1/server/services/mealie";
     };
   };
 

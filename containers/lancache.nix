@@ -19,7 +19,7 @@
         LANCACHE_IP = "10.0.0.5";
         DNS_BIND_IP = "10.0.0.5";
         UPSTREAM_DNS = "1.1.1.1";
-        CACHE_ROOT = "/mnt/lancache/lancache";
+        CACHE_ROOT = "/mnt/TB1/server/services/lancache/lancache";
         CACHE_DISK_SIZE = "2000g";
         MIN_FREE_DISK = "10g";
         CACHE_INDEX_SIZE = "500m";
