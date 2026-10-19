@@ -8,9 +8,10 @@
     browser.enable = true;
 
     extraEnvironment = {
-      NEXTAUTH_URL = "http://127.0.0.1:3000";
+      NEXTAUTH_URL = "http://10.0.0.5:3000";
 
-      DISABLE_SIGNUPS = "false";
+      # Fuer den ersten Account kurz auf "false" setzen
+      DISABLE_SIGNUPS = "true";
 
       # Keine automatische Release-Abfrage
       DISABLE_NEW_RELEASE_CHECK = "true";

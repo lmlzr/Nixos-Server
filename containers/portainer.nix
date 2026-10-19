@@ -5,7 +5,7 @@
     backend = "docker";
 
     containers.portainer = {
-      image = "portainer/portainer-ce:2.21.4";
+      image = "portainer/portainer-ce:lts";
 
       ports = [
         "9443:9443"

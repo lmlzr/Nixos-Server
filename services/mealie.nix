@@ -9,9 +9,9 @@
 
     settings = {
       TZ = "Europe/Berlin";
-      BASE_URL = "http://127.0.0.1:9925";
+      BASE_URL = "http://10.0.0.5:9925";
 
-      ALLOW_SIGNUP = "true";
+      ALLOW_SIGNUP = "false";
 
       DB_ENGINE = "sqlite";
     };

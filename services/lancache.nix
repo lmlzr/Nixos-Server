@@ -8,9 +8,12 @@ in
     withSlice = true;
   };
 
-  services.nginx.defaultListenAddresses = [
-    "10.0.0.1"
-  ];
+  # enp3s0 nicht von NetworkManager verwalten lassen, sonst kann NM die zusaetzliche
+  # statische Lancache-IP beim Reconnect entfernen. DHCP uebernimmt dafuer dhcpcd.
+  networking.networkmanager.unmanaged = [ "enp3s0" ];
+  networking.interfaces.enp3s0.useDHCP = true;
+
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   networking.interfaces.enp3s0.ipv4.addresses = [
     {
