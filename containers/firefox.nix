@@ -22,8 +22,12 @@
         PUID = "1000";
         PGID = "1000";
         TITLE = "Firefox";
-        NVIDIA_DRIVER_CAPABILITIES = "all";
       };
+
+      # Login fuer die Web-Oberflaeche. Datei anlegen (0600) mit:
+      #   CUSTOM_USER=lmlzr
+      #   PASSWORD=...
+      environmentFiles = [ "/etc/secrets/firefox.env" ];
 
       autoStart = true;
 

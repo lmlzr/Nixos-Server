@@ -2,26 +2,20 @@
 
 {
   environment.systemPackages = with pkgs; [
-    syncthing
     git
     gh
     neovim
-    fastfetch
     wget
     gcc
-    pulseaudio
     stow
     socat
-    cron
     rar
     fzf
     htop
     bat
     ffmpeg
     libbluray
-    mesa
-    sudo
-    kitty
-    steam-lancache-prefill
+    kitty.terminfo
+    qbittorrent-cli
   ];
 }

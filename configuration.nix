@@ -7,6 +7,8 @@
       ./modules/software.nix
       ./modules/systemdboot.nix
       ./modules/links.nix
+      ./modules/nvidia.nix
+      ./modules/optimizations.nix
 
       ./Hardware/hdds.nix
 
@@ -20,11 +22,15 @@
       ./services/karakeep.nix
       ./services/mealie.nix
       ./services/syncthing.nix
-      # ./services/vm-setup.nix # dont need it my router is a vm host
       ./services/docker.nix
       ./services/stirling-pdf.nix
       ./services/audiobookshelf.nix
-      ./services/lancache.nix 
+      ./services/lancache.nix
+      ./services/smb.nix
+      ./services/mosquitto.nix
+
+      ./services/steam-lancache-prefill.nix
+      ./services/arr-stack/default.nix
     ];
 
   networking.hostName = "neotokyo";
@@ -44,8 +50,18 @@
     LC_TIME = "de_DE.UTF-8";
   };
   console.keyMap = "de";
-  security.rtkit.enable = true;
   nixpkgs.config.allowUnfree = true;
-  services.openssh.enable = true;
+  # Secrets (WireGuard, Passwoerter) liegen ausserhalb des Nix-Stores, siehe README
+  systemd.tmpfiles.rules = [ "d /etc/secrets 0711 root root -" ];
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";
+      # Erst auf false setzen, wenn ein Key in users/lmlzr.nix eingetragen und getestet ist
+      PasswordAuthentication = true;
+    };
+  };
   system.stateVersion = "26.11";
 }

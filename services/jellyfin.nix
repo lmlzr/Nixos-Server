@@ -10,13 +10,5 @@
     group = "jellyfin";
   };
 
-  # NVIDIA-Hardwarebeschleunigung
-  hardware.graphics.enable = true;
-
-  environment.systemPackages = with pkgs; [
-    jellyfin
-    jellyfin-web
-  ];
+  # NVIDIA-Hardwarebeschleunigung: siehe modules/nvidia.nix
 }
-
-
