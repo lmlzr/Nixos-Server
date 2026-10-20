@@ -10,7 +10,7 @@
       ./modules/nvidia.nix
       ./modules/optimizations.nix
 
-      ./Hardware/hdds.nix
+      #./Hardware/hdds.nix
 
       ./users/lmlzr.nix
 

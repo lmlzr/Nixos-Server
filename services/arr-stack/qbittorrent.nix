@@ -13,7 +13,12 @@ in
   vpnNamespaces.proton = {
     enable = true;
     wireguardConfigFile = "/etc/secrets/proton-wg.conf";
-    accessibleFrom = [ "10.0.0.0/24" ];
+    # Netze, aus denen die Web-UI erreichbar ist. Nicht zu weit fassen:
+    # 10.0.0.0/8 wuerde z.B. ProtonVPNs 10.2.0.x (Tunnel/DNS) am VPN vorbei leiten.
+    accessibleFrom = [
+      "10.0.0.0/24"      # Heimnetz
+      "192.168.122.0/24" # libvirt-Netz der Test-VM
+    ];
     portMappings = [
       { from = webuiPort; to = webuiPort; }
     ];

@@ -1,0 +1,59 @@
+{
+  "nodes": {
+    "lancache-nix": {
+      "locked": {
+        "lastModified": 1741876714,
+        "narHash": "sha256-DnsK7a1b2MKOgHqRzaUChXSIavkBmv7+TrAd+WX8/lo=",
+        "owner": "menixator",
+        "repo": "lancache.nix",
+        "rev": "2df456815921c8dc8767d3abff07c086a9528634",
+        "type": "github"
+      },
+      "original": {
+        "owner": "menixator",
+        "repo": "lancache.nix",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1792210252,
+        "narHash": "sha256-Mh0PUaIv4nFY+8wAGonaEh8iBzwsmdNlwjVHmFg1Biw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "09063bd1f2b36fd9fd793c36dfade7bd40a93dfc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "lancache-nix": "lancache-nix",
+        "nixpkgs": "nixpkgs",
+        "vpn-confinement": "vpn-confinement"
+      }
+    },
+    "vpn-confinement": {
+      "locked": {
+        "lastModified": 1791310298,
+        "narHash": "sha256-SpqEEuyrkzTqjIHwHrZE+Rs6ez2tzIeYkSY67zp6fcQ=",
+        "owner": "Maroka-chan",
+        "repo": "VPN-Confinement",
+        "rev": "cc37bcf5000e237709e725a9cda010a5cbce3111",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Maroka-chan",
+        "repo": "VPN-Confinement",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
