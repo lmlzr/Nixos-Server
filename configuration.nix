@@ -14,20 +14,20 @@
 
       ./users/lmlzr.nix
 
-      ./containers/portainer.nix
-      ./containers/firefox.nix
+      #./containers/portainer.nix
+      #./containers/firefox.nix
 
       ./services/jellyfin.nix
-      ./services/home-assistant.nix
-      ./services/karakeep.nix
-      ./services/mealie.nix
-      ./services/syncthing.nix
+      #./services/home-assistant.nix
+      #./services/karakeep.nix
+      #./services/mealie.nix
+      #./services/syncthing.nix
       ./services/docker.nix
       ./services/stirling-pdf.nix
       ./services/audiobookshelf.nix
       ./services/lancache.nix
       ./services/smb.nix
-      ./services/mosquitto.nix
+      #./services/mosquitto.nix
 
       ./services/steam-lancache-prefill.nix
       ./services/arr-stack/default.nix
