@@ -42,7 +42,7 @@ in
 
   # nofail: fehlt der Pool, bootet das System trotzdem und bleibt per SSH erreichbar.
   # Die abhaengigen Dienste starten dann nicht (RequiresMountsFor unten).
-  fileSystems = lib.mapAttrs (mountpoint: dataset: {
+  nas.mounts = lib.mapAttrs (mountpoint: dataset: {
     device = dataset;
     fsType = "zfs";
     options = [ "nofail" ];
@@ -59,7 +59,7 @@ in
     description = "NAS: Grundordner auf dem Pool anlegen";
     wantedBy = [ "multi-user.target" ];
     after = [ "local-fs.target" ];
-    before = lib.attrNames mountDependents;
+    before = map (name: "${name}.service") (lib.attrNames mountDependents);
     unitConfig = {
       RequiresMountsFor = [ cfg.mediaDir cfg.shareDir cfg.lancacheDir ];
       ConditionPathIsMountPoint = cfg.mediaDir;

@@ -9,11 +9,9 @@
     ./qbittorrent.nix
   ];
 
-  # Gemeinsame Gruppe, damit Downloads, *arr und Jellyfin auf dieselben Dateien zugreifen
+  # Gemeinsame Gruppe, damit Downloads, *arr und Jellyfin auf dieselben Dateien zugreifen.
+  # Downloads liegen in ${config.nas.mediaDir}/downloads (gleiches Dataset -> Hardlinks).
+  # Den Ordner legt Hardware/storage.nix an.
   users.groups.media = { };
   users.users.jellyfin.extraGroups = [ "media" ];
-
-  systemd.tmpfiles.rules = [
-    "d /mnt/TB1/media 2775 root media -"
-  ];
 }

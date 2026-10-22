@@ -25,7 +25,7 @@ in
   services.lancache = {
     enable = true;
 
-    cacheLocation = "/mnt/TB1/lancache";
+    cacheLocation = config.nas.lancacheDir; # Dataset mit 2-TB-Quota
     logPrefix = "/var/log/nginx/lancache";
 
     listenAddress = lancacheIP;
