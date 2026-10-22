@@ -17,5 +17,6 @@
     libbluray
     kitty.terminfo
     qbittorrent-cli
+    tmux
   ];
 }
