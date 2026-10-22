@@ -22,6 +22,8 @@ let
     # MariaDB (Datenbank des Pterodactyl-Panels)
     "/var/lib/mysql"                = { enable = config.services.mysql.enable;          service = "mysql";          source = "${root}/mysql";          owner = "mysql:mysql"; };
     "/var/lib/pterodactyl-panel"    = { enable = config.services.pterodactyl.panel.enable or false; service = "pterodactyl-panel-setup"; source = "${root}/pterodactyl-panel"; owner = "pterodactyl:pterodactyl"; };
+    # Portainer (Docker-Container, Unit heisst docker-portainer)
+    "/var/lib/portainer"            = { enable = config.virtualisation.oci-containers.containers ? portainer; service = "docker-portainer"; source = "${root}/portainer"; owner = "root:root"; };
     # Wings: Gameserver-Daten (volumes/, backups/, archives/)
     "/var/lib/pterodactyl"          = { enable = config.services.pterodactyl.wings.enable or false; service = "wings"; source = "${root}/pterodactyl-wings"; owner = "root:root"; };
   };

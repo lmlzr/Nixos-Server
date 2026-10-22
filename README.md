@@ -20,6 +20,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Prowlarr | http://neotokyo:9696 | LAN | |
 | qBittorrent | http://neotokyo:8080 | LAN | läuft im VPN-Namespace; vom Server selbst: `192.168.15.1:8080` |
 | Pterodactyl Panel | http://10.0.0.5:8090 | LAN | über die IP öffnen (`APP_URL`) |
+| Portainer | https://neotokyo:9443 | LAN | Docker-Verwaltung; Port 8000 nur für Edge-Agents |
 
 ### Sonstige Ports
 
@@ -38,7 +39,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Lancache Metrics | 8080/tcp | lokal | nginx auf `localhost`; aus dem LAN geht 8080 an qBittorrent |
 
 Laufen inzwischen auf einem anderen Host (hier auskommentiert): Home Assistant, Karakeep,
-Mealie, Syncthing, Mosquitto, Portainer, Firefox.
+Mealie, Syncthing, Mosquitto, Firefox.
 
 ## Pterodactyl
 
@@ -78,8 +79,8 @@ Umzug von TrueNAS, Plattentausch, Snapshots, L2ARC: **[docs/NAS-Migration.md](do
 
 Dienst-Daten liegen auf dem Pool und werden per Bind-Mount eingehängt (`modules/links.nix`):
 `/var/lib/<dienst>` ← `/mnt/tank/services/<dienst>` für Jellyfin, Audiobookshelf, Stirling-PDF,
-Sonarr, Radarr, Lidarr, Prowlarr, qBittorrent, MariaDB (`mysql`), Pterodactyl (`pterodactyl-panel`,
-`pterodactyl-wings`). Fehlt der Pool, bootet das System trotzdem, diese Dienste starten dann aber nicht.
+Sonarr, Radarr, Lidarr, Prowlarr, qBittorrent, MariaDB (`mysql`), Portainer, Pterodactyl
+(`pterodactyl-panel`, `pterodactyl-wings`). Docker-Images selbst liegen in `/var/lib/docker` auf der Systemplatte. Fehlt der Pool, bootet das System trotzdem, diese Dienste starten dann aber nicht.
 
 **Samba-Freigaben** (`services/smb.nix`, nur SMB2+, keine Gäste, nur private Netze):
 
