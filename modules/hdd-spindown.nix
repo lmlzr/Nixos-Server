@@ -36,7 +36,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ pkgs.hd-idle ];
+    # hdparm -C zeigt, ob eine Platte laeuft (active/idle) oder schlaeft (standby)
+    environment.systemPackages = [ pkgs.hd-idle pkgs.hdparm ];
 
     systemd.services.hd-idle = {
       description = "Spindown der Daten-HDDs nach ${toString cfg.idleMinutes} min Leerlauf";

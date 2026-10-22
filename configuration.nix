@@ -16,6 +16,7 @@
       ./modules/zfs-snapshots.nix
       ./modules/storage-monitoring.nix
       ./modules/backup.nix
+      ./modules/hdd-spindown.nix
 
       ./users/lmlzr.nix
       ./users/dbglas.nix
@@ -39,6 +40,9 @@
       ./services/arr-stack/default.nix
       ./services/pterodactyl
     ];
+
+  # Daten-HDDs nach 15 min Leerlauf abschalten (nur echte Hardware)
+  nas.spindown.enable = true;
 
   services.pterodactyl = {
     panel.enable = true;

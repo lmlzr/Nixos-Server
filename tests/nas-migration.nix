@@ -130,7 +130,9 @@ pkgs.testers.runNixOSTest {
     with subtest("Snapshots"):
         # sanoid merkt sich die Dataset-Liste 20 min; beim ersten Boot gab es noch keinen Pool
         machine.succeed("rm -rf /var/cache/private/sanoid/* && systemctl start sanoid.service")
-        machine.wait_until_succeeds("zfs list -H -t snapshot -o name | grep -q tank/services@", timeout=60)
+        # sanoid arbeitet die Datasets nacheinander ab
+        for ds in ["tank/media@", "tank/share@", "tank/services@"]:
+            machine.wait_until_succeeds(f"zfs list -H -t snapshot -o name | grep -q {ds}", timeout=60)
         snaps = machine.succeed("zfs list -H -t snapshot -o name")
         for ds in ["tank/media@", "tank/share@", "tank/services@"]:
             assert ds in snaps, snaps
