@@ -10,10 +10,7 @@ let
   # Nur Dienste, die auf diesem Host aktiv sind (sonst fehlen z. B. die Benutzer).
   links = lib.filterAttrs (target: link: link.enable) {
     "/var/lib/jellyfin"             = { enable = config.services.jellyfin.enable;       source = "${root}/jellyfin";       owner = "jellyfin:jellyfin"; };
-    "/var/lib/hass"                 = { enable = config.services.home-assistant.enable; source = "${root}/home-assistant"; owner = "hass:hass"; };
     "/var/lib/audiobookshelf"       = { enable = config.services.audiobookshelf.enable; source = "${root}/audiobookshelf"; owner = "audiobookshelf:audiobookshelf"; };
-    "/var/lib/karakeep"             = { enable = config.services.karakeep.enable;       source = "${root}/karakeep";       owner = "karakeep:karakeep"; };
-    "/var/lib/private/mealie"       = { enable = config.services.mealie.enable;         source = "${root}/mealie";         owner = "root:root"; };
     "/var/lib/private/stirling-pdf" = { enable = config.services.stirling-pdf.enable;   source = "${root}/stirling-pdf";   owner = "root:root"; };
     "/var/lib/syncthing"            = { enable = config.services.syncthing.enable;      source = "${root}/syncthing";      owner = "lmlzr:users"; };
     "/var/lib/pterodactyl-panel"    = { enable = config.services.pterodactyl.panel.enable or false; source = "${root}/pterodactyl-panel"; owner = "pterodactyl:pterodactyl"; };
@@ -60,5 +57,5 @@ in
             ${root}/*) rm "/var/lib/${name}" ;;
           esac
         '')
-        [ "jellyfin" "hass" "audiobookshelf" "karakeep" "mealie" "stirling-pdf" "syncthing" ]);
+        [ "jellyfin" "audiobookshelf" "stirling-pdf" "syncthing" ]);
 }

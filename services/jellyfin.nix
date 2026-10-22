@@ -9,6 +9,4 @@
     user = "jellyfin";
     group = "jellyfin";
   };
-
-  # NVIDIA-Hardwarebeschleunigung: siehe modules/nvidia.nix
 }
