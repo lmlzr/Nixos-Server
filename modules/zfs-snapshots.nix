@@ -15,7 +15,8 @@ in
       # Medien sind gross und wiederbeschaffbar: kurze Aufbewahrung, sonst bleibt
       # Platz von geloeschten/ersetzten Filmen lange belegt
       media = { hourly = 0; daily = 7; monthly = 0; yearly = 0; autosnap = true; autoprune = true; };
-      share = { hourly = 24; daily = 30; monthly = 6; yearly = 0; autosnap = true; autoprune = true; };
+      # Nur taeglich: stuendliche Snapshots wuerden die HDDs jede Stunde aus dem Spindown wecken
+      share = { hourly = 0; daily = 30; monthly = 6; yearly = 0; autosnap = true; autoprune = true; };
       services = { hourly = 0; daily = 14; monthly = 3; yearly = 0; autosnap = true; autoprune = true; };
     };
 

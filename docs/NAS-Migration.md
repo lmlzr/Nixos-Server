@@ -34,7 +34,7 @@ UIDs: `lmlzr` = 1000, `dbglas` = 1003 wie unter TrueNAS → deren Dateien passen
 |---|---|---|---|
 | `tank` | `/mnt/tank` | Root, nach dem Umzug leer | keine |
 | `tank/media` | `/mnt/tank/media` | `recordsize=1M` | 7 tägliche |
-| `tank/share` | `/mnt/tank/share` | `normalization=formD` | 24 stündl., 30 tägl., 6 monatl. |
+| `tank/share` | `/mnt/tank/share` | `normalization=formD` | 30 tägl., 6 monatl. |
 | `tank/services` | `/mnt/tank/services` | Standard | 14 tägl., 3 monatl. |
 | `tank/lancache` | `/mnt/tank/lancache` | `recordsize=1M`, `quota=2T` | keine |
 | `tank/reserved` | – | `refreservation=500G` | – |
@@ -275,6 +275,30 @@ cp -a /mnt/tank/share/.zfs/snapshot/autosnap_<datum>_daily/lmlzr/Datei /mnt/tank
 - `zfs-scrub.timer` (monatlich): Ergebnis in `zpool status tank`.
 - ZED meldet Plattenfehler und Scrub-Ergebnisse ins Journal: `journalctl -u zfs-zed`.
 - Benachrichtigung per Mail/ntfy: noch offen (kommt mit dem Backup-Konzept).
+
+## Spindown der HDDs
+
+`modules/hdd-spindown.nix` (hd-idle): die beiden 16-TB-Platten werden nach 15 min ohne Zugriff
+abgeschaltet; Systemplatte und SSD nie. Einstellbar über `nas.spindown.idleMinutes`.
+
+```bash
+sudo hdparm -C /dev/disk/by-id/wwn-0x5000c500e7ab0441   # "standby" = schläft, "active/idle" = läuft
+sudo hdparm -C /dev/disk/by-id/wwn-0x5000c500e7aafd88
+journalctl -u hd-idle
+```
+
+Wann die Platten trotzdem wach bleiben – alles, was auf `tank` liest oder schreibt:
+- Dienst-Daten in `tank/services` (Jellyfin-Datenbank, MariaDB, Sonarr/Radarr, Gameserver, Logs)
+- die nächtlichen Snapshots (sanoid, einmal pro Nacht für alle Datasets – gewollt)
+- laufende Downloads in `tank/media/downloads`, Lancache-Downloads
+- Bibliotheks-Scans von Jellyfin und Ordner-Scans von Sonarr/Radarr/Lidarr
+- der tägliche SMART-Kurztest (02:00) und der monatliche Scrub – gewollt
+
+Dauerhaft schlafen können die Platten erst, wenn `services` auf einem eigenen SSD-Pool liegt.
+smartd ist so eingestellt (`-n standby`), dass es schlafende Platten nicht weckt.
+
+Zählerstand der Starts (Verschleiß beobachten):
+`sudo smartctl -A /dev/disk/by-id/wwn-0x5000c500e7ab0441 | grep -E 'Start_Stop|Load_Cycle'`
 
 ## L2ARC (SSD-Lesecache) – nur bei nachgewiesenem Nutzen
 
