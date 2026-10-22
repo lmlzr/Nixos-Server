@@ -27,7 +27,8 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 |---|---|---|---|
 | SSH | 22/tcp | LAN | |
 | Lancache | 80/tcp, 443/tcp | LAN | nur auf `10.0.0.5`; Clients brauchen DNS-Umleitung der Spiele-Domains |
-| Samba | 139/tcp, 445/tcp, 137–138/udp | LAN | Freigabe `share` → `/mnt/TB1` |
+| Samba | 139/tcp, 445/tcp, 137–138/udp | LAN | nur auf der LAN-Schnittstelle und nur aus privaten Netzen, siehe „Speicher (NAS)“ |
+| Windows-Netzwerkerkennung (wsdd) | 5357/tcp, 3702/udp | LAN | Server erscheint unter „Netzwerk“ |
 | Jellyfin (Discovery) | 1900/udp, 7359/udp | LAN | Clients finden den Server im LAN |
 | Pterodactyl Wings API | 8443/tcp | LAN | Browser-Konsole und Panel sprechen Wings hierüber an |
 | Pterodactyl SFTP | 2022/tcp | LAN | Dateizugriff auf Gameserver, Login mit Panel-Benutzer |
@@ -62,6 +63,42 @@ Ohne SMTP landen Panel-Mails (z. B. Passwort-Reset) nur im Log
 (`/var/lib/pterodactyl-panel/storage/logs`). SMTP lässt sich über
 `services.pterodactyl.panel.settings` einstellen.
 
+## Speicher (NAS)
+
+ZFS-Pool `tank`: Mirror aus 2× 16 TB (`wwn-0x5000c500e7ab0441`, `wwn-0x5000c500e7aafd88`).
+Konfiguration in `Hardware/storage.nix`, Pfade zentral in `modules/storage-paths.nix`.
+Umzug von TrueNAS, Plattentausch, Snapshots, L2ARC: **[docs/NAS-Migration.md](docs/NAS-Migration.md)**.
+
+| Dataset | Pfad | Inhalt | Snapshots |
+|---|---|---|---|
+| `tank/media` | `/mnt/tank/media` | Filme, Serien, Musik …, `downloads/` | 7 Tage |
+| `tank/share` | `/mnt/tank/share` | `lmlzr/`, `dbglas/` | 24 h, 30 Tage, 6 Monate |
+| `tank/services` | `/mnt/tank/services` | Daten der Dienste (s. u.) | 14 Tage, 3 Monate |
+| `tank/lancache` | `/mnt/tank/lancache` | Spiele-Cache, max. 2 TB | keine |
+
+Dienst-Daten liegen auf dem Pool und werden per Bind-Mount eingehängt (`modules/links.nix`):
+`/var/lib/<dienst>` ← `/mnt/tank/services/<dienst>` für Jellyfin, Audiobookshelf, Stirling-PDF,
+Sonarr, Radarr, Lidarr, Prowlarr, qBittorrent, MariaDB (`mysql`), Pterodactyl (`pterodactyl-panel`,
+`pterodactyl-wings`). Fehlt der Pool, bootet das System trotzdem, diese Dienste starten dann aber nicht.
+
+**Samba-Freigaben** (`services/smb.nix`, nur SMB2+, keine Gäste, nur private Netze):
+
+| Freigabe | Pfad | `lmlzr` | `dbglas` |
+|---|---|---|---|
+| `share` | `/mnt/tank/share` | lesen/schreiben | unsichtbar |
+| `lmlzr` | `/mnt/tank/share/lmlzr` | lesen/schreiben | unsichtbar |
+| `dbglas` | `/mnt/tank/share/dbglas` | lesen/schreiben (Admin) | lesen/schreiben |
+| `media` | `/mnt/tank/media` | lesen/schreiben (Gruppe `media`) | unsichtbar |
+
+**Tests** (VM, dauern einige Minuten):
+```bash
+nix build .#checks.x86_64-linux.nas-migration -L
+nix build .#checks.x86_64-linux.pterodactyl -L
+```
+
+**Test-VM ohne Pool:** in `configuration.nix` die vier NAS-Zeilen (`Hardware/storage.nix` …
+`modules/backup.nix`) auskommentieren. Die Pfade unter `/mnt/tank` sind dann normale Ordner.
+
 ## Secrets
 
 Liegen nicht im Repo, sondern auf dem Server unter `/etc/secrets/` (Dateien `0600`):
@@ -74,6 +111,6 @@ Fehlt eine Datei, startet der jeweilige Dienst nicht.
 
 ## Einmalige Einrichtung
 
-- Samba-Passwort: `sudo smbpasswd -a lmlzr`
+- Samba-Passwörter: `sudo smbpasswd -a lmlzr` und `sudo smbpasswd -a dbglas`
 - SteamPrefill: `cd /var/lib/steam-prefill && SteamPrefill select-apps`
-- *arr: qBittorrent als Download-Client unter `192.168.15.1:8080` eintragen, Medien unter `/mnt/TB1/media`
+- *arr: qBittorrent als Download-Client unter `192.168.15.1:8080` eintragen, Medien unter `/mnt/tank/media`, Downloads unter `/mnt/tank/media/downloads`

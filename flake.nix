@@ -25,5 +25,13 @@
         inputs.vpn-confinement.nixosModules.default
       ];
     };
+
+    # VM-Tests, z. B.: nix build .#checks.x86_64-linux.nas-migration -L
+    checks.${system} =
+      let pkgs = nixpkgs.legacyPackages.${system};
+      in {
+        nas-migration = import ./tests/nas-migration.nix { inherit pkgs; };
+        pterodactyl = import ./tests/pterodactyl.nix { inherit pkgs; };
+      };
   };
 }
