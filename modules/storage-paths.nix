@@ -43,10 +43,19 @@ in
       description = "Dataset <pool>/lancache: wegwerfbarer Spiele-Cache mit Quota.";
     };
 
+    mounts = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+      default = { };
+      internal = true;
+      description = "Datasets und Bind-Mounts des NAS; werden zu fileSystems (getrennt, damit Tests sie uebernehmen koennen).";
+    };
+
     lanInterface = lib.mkOption {
       type = lib.types.str;
       default = "enp3s0";
       description = "LAN-Schnittstelle. Nur hier werden Samba-Ports geoeffnet. Auf neuer Hardware mit `ip link` pruefen.";
     };
   };
+
+  config.fileSystems = cfg.mounts;
 }

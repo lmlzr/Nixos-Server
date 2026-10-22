@@ -6,15 +6,21 @@
       ./hardware-configuration.nix
       ./modules/software.nix
       ./modules/systemdboot.nix
+      ./modules/storage-paths.nix
       ./modules/links.nix
       ./modules/nvidia.nix
       ./modules/optimizations.nix
 
-      #./Hardware/hdds.nix
+      # NAS: ZFS-Pool tank (nur auf der echten Hardware; in der Test-VM auskommentieren)
+      ./Hardware/storage.nix
+      ./modules/zfs-snapshots.nix
+      ./modules/storage-monitoring.nix
+      ./modules/backup.nix
 
       ./users/lmlzr.nix
+      ./users/dbglas.nix
 
-      #./containers/portainer.nix
+      ./containers/portainer.nix
       #./containers/firefox.nix
 
       ./services/jellyfin.nix
@@ -22,7 +28,7 @@
       #./services/karakeep.nix
       #./services/mealie.nix
       #./services/syncthing.nix
-      #./services/docker.nix
+      ./services/docker.nix
       ./services/stirling-pdf.nix
       ./services/audiobookshelf.nix
       ./services/lancache.nix
