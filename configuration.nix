@@ -22,7 +22,7 @@
       #./services/karakeep.nix
       #./services/mealie.nix
       #./services/syncthing.nix
-      ./services/docker.nix
+      #./services/docker.nix
       ./services/stirling-pdf.nix
       ./services/audiobookshelf.nix
       ./services/lancache.nix
@@ -31,7 +31,13 @@
 
       ./services/steam-lancache-prefill.nix
       ./services/arr-stack/default.nix
+      ./services/pterodactyl
     ];
+
+  services.pterodactyl = {
+    panel.enable = true;
+    wings.enable = true;
+  };
 
   networking.hostName = "neotokyo";
   networking.networkmanager.enable = true;

@@ -7,14 +7,18 @@ let
   # vertragen sich mit systemd StateDirectory.
   # Dienste mit DynamicUser (mealie, stirling-pdf) liegen unter /var/lib/private,
   # den Besitzer setzt dort systemd selbst.
-  links = {
-    "/var/lib/jellyfin"             = { source = "${root}/jellyfin";       owner = "jellyfin:jellyfin"; };
-    "/var/lib/hass"                 = { source = "${root}/home-assistant"; owner = "hass:hass"; };
-    "/var/lib/audiobookshelf"       = { source = "${root}/audiobookshelf"; owner = "audiobookshelf:audiobookshelf"; };
-    "/var/lib/karakeep"             = { source = "${root}/karakeep";       owner = "karakeep:karakeep"; };
-    "/var/lib/private/mealie"       = { source = "${root}/mealie";         owner = "root:root"; };
-    "/var/lib/private/stirling-pdf" = { source = "${root}/stirling-pdf";   owner = "root:root"; };
-    "/var/lib/syncthing"            = { source = "${root}/syncthing";      owner = "lmlzr:users"; };
+  # Nur Dienste, die auf diesem Host aktiv sind (sonst fehlen z. B. die Benutzer).
+  links = lib.filterAttrs (target: link: link.enable) {
+    "/var/lib/jellyfin"             = { enable = config.services.jellyfin.enable;       source = "${root}/jellyfin";       owner = "jellyfin:jellyfin"; };
+    "/var/lib/hass"                 = { enable = config.services.home-assistant.enable; source = "${root}/home-assistant"; owner = "hass:hass"; };
+    "/var/lib/audiobookshelf"       = { enable = config.services.audiobookshelf.enable; source = "${root}/audiobookshelf"; owner = "audiobookshelf:audiobookshelf"; };
+    "/var/lib/karakeep"             = { enable = config.services.karakeep.enable;       source = "${root}/karakeep";       owner = "karakeep:karakeep"; };
+    "/var/lib/private/mealie"       = { enable = config.services.mealie.enable;         source = "${root}/mealie";         owner = "root:root"; };
+    "/var/lib/private/stirling-pdf" = { enable = config.services.stirling-pdf.enable;   source = "${root}/stirling-pdf";   owner = "root:root"; };
+    "/var/lib/syncthing"            = { enable = config.services.syncthing.enable;      source = "${root}/syncthing";      owner = "lmlzr:users"; };
+    "/var/lib/pterodactyl-panel"    = { enable = config.services.pterodactyl.panel.enable or false; source = "${root}/pterodactyl-panel"; owner = "pterodactyl:pterodactyl"; };
+    # Wings: Gameserver-Daten (volumes/, backups/, archives/)
+    "/var/lib/pterodactyl"          = { enable = config.services.pterodactyl.wings.enable or false; source = "${root}/pterodactyl-wings"; owner = "root:root"; };
   };
 
 in
