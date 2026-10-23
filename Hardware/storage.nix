@@ -53,6 +53,10 @@ in
   systemd.services = lib.mapAttrs (name: dep: {
     unitConfig.RequiresMountsFor = dep.paths;
   }) mountDependents // {
+  # Pool fehlt (Platten nicht eingebaut): Import nach 30 s abbrechen statt ewig zu warten,
+  # sonst haengt nixos-rebuild switch an diesem Dienst.
+  zfs-import-tank.serviceConfig.TimeoutStartSec = "30s";
+
   # Oberste Ordner mit Besitzer anlegen, nur wenn die Datasets wirklich eingehaengt sind.
   # Nicht rekursiv: bestehende Dateien werden nicht angefasst.
   nas-dirs = {

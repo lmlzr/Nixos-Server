@@ -16,8 +16,9 @@
     ffmpeg
     libbluray
     kitty.terminfo
-    qbittorrent-cli
+    # qbittorrent-cli  # baut aktuell nicht: patchelf-Absturz an .NET-2.1-Runtime (nixpkgs-Bug)
     tmux
     fastfetch
+    claude-code
   ];
 }
