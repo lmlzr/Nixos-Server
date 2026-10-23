@@ -87,5 +87,6 @@
       PasswordAuthentication = true;
     };
   };
+  nas.lanInterface = "enp4s0";
   system.stateVersion = "26.11";
 }
