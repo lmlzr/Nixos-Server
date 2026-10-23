@@ -8,7 +8,7 @@
 # Checkmk Linux-Agent (Bash-Skript) und SMART-Plugin, unveraendert von Checkmk.
 # Version moeglichst gleich oder aelter als die des Checkmk-Servers.
 let
-  version = "2.5.0p17";
+  version = "2.5.0p7"; # gleich wie der Checkmk-Server (10.0.0.3)
   base = "https://raw.githubusercontent.com/Checkmk/checkmk/v${version}/agents";
 in
 stdenvNoCC.mkDerivation {
@@ -17,12 +17,12 @@ stdenvNoCC.mkDerivation {
 
   agent = fetchurl {
     url = "${base}/check_mk_agent.linux";
-    hash = "sha256-e5lzhU+KoAmfHPkOezVo4ormKuRwq665oMzmsdmNdDc=";
+    hash = "sha256-WVcETpNzj7wGuf3jh3MFE+QESgFu35/xH+hL15GnInY=";
   };
 
   smartPlugin = fetchurl {
     url = "${base}/plugins/smart";
-    hash = "sha256-p+7b14PQu6wf9sN7oSNcImu597/jF2WC13E4H02i4DM=";
+    hash = "sha256-hFwuvveSw0MmefylzHpzjp17k/jbQh5KfkayfXaJU68=";
   };
 
   dontUnpack = true;

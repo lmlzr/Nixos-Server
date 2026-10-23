@@ -10,7 +10,7 @@ Am echten Pool läuft nichts automatisch – jeden Befehl selbst ausführen und 
 |---|---|
 | Pool | `TB1`, **Mirror** aus 2× 16 TB, `ashift=12`, ONLINE, letzter Scrub ohne Fehler |
 | Platten | `/dev/disk/by-id/wwn-0x5000c500e7ab0441`, `/dev/disk/by-id/wwn-0x5000c500e7aafd88` |
-| Belegung | 7,74 TB von 14,5 TB (53 %), 6,81 TB frei |
+| Belegung | 7,74 TB von 14,5 TB (53 %), 6,81 TB frei – vor dem Löschen des Lancache-Ordners; jetzt ca. 6,4 TB belegt, ca. 8,1 TB frei (`zpool list TB1`) |
 | Herkunft | TrueNAS CORE, ZFS 2.1.14 (NixOS hat 2.4.4 → Import problemlos) |
 | Eigenschaften | `compression=lz4`, `atime=off`, `recordsize=128K`, `acltype=nfsv4` |
 | Daten | alles im Root-Dataset `TB1`, keine Snapshots |
@@ -19,7 +19,7 @@ Am echten Pool läuft nichts automatisch – jeden Befehl selbst ausführen und 
 |---|---|---|---|
 | `jellyfin/TV` | 3,3 TB | 1001 | `tank/media` → `/mnt/tank/media/TV` |
 | `jellyfin/Movies` | 1,9 TB | 1001 | `/mnt/tank/media/Movies` |
-| `jellyfin/lancache` | 1,3 TB | 1001 | **löschen** (Cache, wegwerfbar) |
+| `jellyfin/lancache` | 1,3 TB | 1001 | **bereits gelöscht** |
 | `jellyfin/Audiobooks`, `Manga`, `Music`, `Books`, `Comics` | ~212 GB | 1001 | `/mnt/tank/media/…` (zusätzlich extern gesichert) |
 | `psycho` | 892 GB | 1000 | `tank/share` → `/mnt/tank/share/lmlzr` |
 | `server` | 75 GB | 1002 | `tank/services` → `/mnt/tank/services/alt-truenas` |
@@ -51,11 +51,13 @@ damit Sonarr/Radarr Hardlinks und schnelle Verschiebungen nutzen können.
    (zusammen ~1 TB). Der Umzug ist risikoarm, aber ein Mirror ist kein Backup.
 2. In TrueNAS **alle Aufgaben abschalten**: Periodic Snapshot Tasks, Replication, Scrub Tasks,
    Cloud Sync, Rsync Tasks.
-3. Zustand festhalten (in der TrueNAS-Shell):
+3. **Scrub in TrueNAS laufen lassen** (dauert ~12 h) und abwarten:
    ```bash
+   zpool scrub TB1
    zpool status -v TB1
    ```
-   Erwartet: `state: ONLINE`, `errors: No known data errors`.
+   Erwartet am Ende: `scrub repaired 0B … with 0 errors`, `errors: No known data errors`.
+   So ist sicher, dass beide Platten vor dem Umzug fehlerfreie Daten haben.
 4. Dienste mit Daten auf `TB1` stoppen, TrueNAS-VM **herunterfahren**.
    **Nicht** „Export/Disconnect“ im TrueNAS-Menü verwenden (dort ist „Destroy data“ eine Option).
 5. Proxmox-Host herunterfahren.
@@ -144,7 +146,6 @@ Funktion beide Male `-aHAX` durch `-aHX` ersetzen und den Ordner erneut umziehen
 Reihenfolge (die kleinen zuerst, die großen am Ende):
 
 ```bash
-sudo rm -rf /mnt/tank/jellyfin/lancache                         # 1,3 TB Cache frei machen
 umzug /mnt/tank/dbglas           /mnt/tank/share/dbglas
 umzug /mnt/tank/server           /mnt/tank/services/alt-truenas
 umzug /mnt/tank/psycho           /mnt/tank/share/lmlzr
@@ -155,7 +156,7 @@ sudo rmdir /mnt/tank/jellyfin
 ```
 
 Freier Platz zwischendurch: `zfs list -o name,used,avail tank`. Das größte Stück (TV, 3,3 TB)
-passt nach dem Löschen des Lancache-Ordners problemlos.
+passt problemlos in den freien Platz (der alte Lancache-Ordner ist bereits gelöscht).
 
 **Rechte setzen** – gezielt, nicht rekursiv mit 777:
 ```bash
@@ -218,7 +219,11 @@ Besitzer setzen, Dienst neu starten; danach den Ordner `alt-truenas` löschen.
    sudo systemctl start zfs-health; journalctl -u zfs-health -n 3
    ```
 3. Neustart-Test: neu starten, dann erneut `findmnt -t zfs` und `systemctl --failed`.
-4. Ersten Scrub manuell starten (dauert ~12 h): `sudo zpool scrub tank`.
+4. Ein zusätzlicher Scrub nach dem Umzug ist **nicht nötig**: Beim Kopieren mit `rsync` wurde
+   jeder Block gelesen und dabei von ZFS gegen seine Prüfsumme geprüft, und beim Schreiben
+   bekommt jeder neue Block seine Prüfsumme. Der monatliche `zfs-scrub.timer` übernimmt danach.
+   Wer sofort Gewissheit für die neu geschriebenen Daten will, kann `sudo zpool scrub tank`
+   trotzdem starten (dauert ~12 h, Platten laufen so lange).
 5. Erst wenn alles einige Tage läuft: optional `sudo zpool upgrade tank`
    (danach kein Rückweg zu TrueNAS mehr).
 

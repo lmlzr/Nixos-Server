@@ -18,5 +18,6 @@
     kitty.terminfo
     qbittorrent-cli
     tmux
+    fastfetch
   ];
 }
