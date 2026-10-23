@@ -274,6 +274,8 @@ cp -a /mnt/tank/share/.zfs/snapshot/autosnap_<datum>_daily/lmlzr/Datei /mnt/tank
   `sudo smartctl -a /dev/disk/by-id/wwn-0x5000c500e7ab0441`
 - `zfs-scrub.timer` (monatlich): Ergebnis in `zpool status tank`.
 - ZED meldet Plattenfehler und Scrub-Ergebnisse ins Journal: `journalctl -u zfs-zed`.
+- Checkmk-Agent auf Port 6556 liefert Pool-Zustand, Datasets und (1× täglich) SMART-Werte
+  an den Checkmk-Server – siehe README „Monitoring (Checkmk)“.
 - Benachrichtigung per Mail/ntfy: noch offen (kommt mit dem Backup-Konzept).
 
 ## Spindown der HDDs
@@ -293,6 +295,7 @@ Wann die Platten trotzdem wach bleiben – alles, was auf `tank` liest oder schr
 - laufende Downloads in `tank/media/downloads`, Lancache-Downloads
 - Bibliotheks-Scans von Jellyfin und Ordner-Scans von Sonarr/Radarr/Lidarr
 - der tägliche SMART-Kurztest (02:00) und der monatliche Scrub – gewollt
+- das SMART-Plugin des Checkmk-Agents (1× täglich)
 
 Dauerhaft schlafen können die Platten erst, wenn `services` auf einem eigenen SSD-Pool liegt.
 smartd ist so eingestellt (`-n standby`), dass es schlafende Platten nicht weckt.
