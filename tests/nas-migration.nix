@@ -42,53 +42,87 @@ pkgs.testers.runNixOSTest {
         machine.fail("systemctl is-active jellyfin")
         machine.succeed("systemctl is-active sshd || true")
 
-    with subtest("TrueNAS-Pool TB1 nachbauen (Mirror) und exportieren"):
+    # Ablauf wie in docs/UMZUG.md
+    def check(src, dst):
+        # Pruefzeile aus UMZUG.md: OK = keine Unterschiede
+        return machine.succeed(f"n=$(rsync -aH --dry-run --itemize-changes {src}/ {dst}/ | wc -l); [ \"$n\" -eq 0 ] && echo OK || echo \"UNTERSCHIEDE ($n)\"").strip()
+
+    with subtest("TrueNAS-Pool TB1 nachbauen (Mirror)"):
         machine.succeed(
             "zpool create -o ashift=12 -O compression=lz4 -O atime=off -m /mnt/TB1 TB1 mirror /dev/vdb /dev/vdc",
             "mkdir -p /mnt/TB1/psycho/Fotos /mnt/TB1/dbglas/Daten /mnt/TB1/jellyfin/Movies/Film1 /mnt/TB1/jellyfin/TV/Serie1 /mnt/TB1/jellyfin/lancache /mnt/TB1/jellyfin/Music /mnt/TB1/server/zeug /mnt/TB1/iocage",
             "dd if=/dev/urandom of=/mnt/TB1/jellyfin/Movies/Film1/film.mkv bs=1M count=40",
             "dd if=/dev/urandom of=/mnt/TB1/jellyfin/TV/Serie1/folge.mkv bs=1M count=30",
             "dd if=/dev/urandom of=/mnt/TB1/jellyfin/lancache/cache bs=1M count=20",
+            "echo lied > /mnt/TB1/jellyfin/Music/alt.mp3",
             "echo foto > /mnt/TB1/psycho/Fotos/urlaub.jpg && echo daten > /mnt/TB1/dbglas/Daten/a.txt && echo zeug > /mnt/TB1/server/zeug/x",
             "chown -R 1000:1000 /mnt/TB1/psycho && chown -R 1003:1003 /mnt/TB1/dbglas && chown -R 1001:1001 /mnt/TB1/jellyfin && chown -R 1002:1002 /mnt/TB1/server",
-            "zpool export TB1",
         )
 
-    with subtest("Runbook Schritt: Import mit Umbenennung, Eigenschaften, Datasets"):
+    with subtest("UMZUG.md Teil A: Datasets anlegen und einige Ordner vorab kopieren"):
+        machine.succeed(
+            "rm -rf /mnt/TB1/jellyfin/lancache",
+            # A3 (wie in TrueNAS: Mountpoints geerbt, nicht legacy)
+            "zfs create -o recordsize=1M TB1/media",
+            "zfs create -o utf8only=on -o normalization=formD TB1/share",
+            "zfs create TB1/services",
+            "zfs create -o recordsize=1M -o quota=200M TB1/lancache",
+            # A5: nur dbglas, Movies, Music vorab; psycho, server, TV erst nach dem Umzug
+            "rsync -aH /mnt/TB1/dbglas/ /mnt/TB1/share/dbglas/",
+            "rsync -aH /mnt/TB1/jellyfin/Movies/ /mnt/TB1/media/Movies/",
+            "rsync -aH /mnt/TB1/jellyfin/Music/ /mnt/TB1/media/Music/",
+        )
+        assert check("/mnt/TB1/jellyfin/Movies", "/mnt/TB1/media/Movies") == "OK"
+        # Aenderungen nach dem Vorab-Kopieren: geaendert, neu, geloescht
+        machine.succeed(
+            "echo mehr >> /mnt/TB1/jellyfin/Movies/Film1/film.mkv",
+            "mkdir -p /mnt/TB1/jellyfin/Movies/Film2 && echo neu > /mnt/TB1/jellyfin/Movies/Film2/neu.mkv",
+            "rm /mnt/TB1/jellyfin/Music/alt.mp3",
+        )
+        assert check("/mnt/TB1/jellyfin/Movies", "/mnt/TB1/media/Movies").startswith("UNTERSCHIEDE")
+        machine.succeed("zpool export TB1")
+
+    with subtest("UMZUG.md B1-B3: Import, Eigenschaften, Neustart"):
         machine.succeed(
             "zpool import -d /dev/disk/by-path -f -N TB1 tank",
-            "zfs set mountpoint=legacy atime=off xattr=sa acltype=posixacl tank",
-            "zfs create -o mountpoint=legacy -o recordsize=1M tank/media",
-            "zfs create -o mountpoint=legacy -o utf8only=on -o normalization=formD tank/share",
-            "zfs create -o mountpoint=legacy tank/services",
-            "zfs create -o mountpoint=legacy -o recordsize=1M -o quota=200M tank/lancache",
+            "for ds in tank tank/media tank/share tank/services tank/lancache; do zfs set mountpoint=legacy atime=off xattr=sa acltype=posixacl $ds; done",
             "zfs create -o mountpoint=none -o refreservation=100M tank/reserved",
         )
-        # Runbook: danach neu starten; Pool wird automatisch importiert und eingehaengt
+        props = machine.succeed("zfs get -H -r -o name,property,value mountpoint,acltype,xattr tank | grep -v -e iocage -e reserved")
+        assert "/mnt" not in props and "nfsv4" not in props, props
         machine.shutdown()
         machine.start()
         machine.wait_for_unit("multi-user.target")
-        machine.succeed("mountpoint -q /mnt/tank/media && mountpoint -q /mnt/tank/share && mountpoint -q /mnt/tank/services")
-        machine.succeed("zpool list -H -o name | grep -x tank")
+        for m in ["/mnt/tank", "/mnt/tank/media", "/mnt/tank/share", "/mnt/tank/services", "/mnt/tank/lancache"]:
+            machine.succeed(f"mountpoint -q {m}")
         machine.succeed("test -d /mnt/tank/services/jellyfin")
         machine.succeed("stat -c '%a %U %G' /mnt/tank/media | grep '2775 root media'")
         machine.succeed("stat -c '%a %U %G' /mnt/tank/share/dbglas | grep '700 dbglas dbglas'")
 
-    with subtest("Runbook Schritt: Ordner fuer Ordner umziehen"):
+    with subtest("UMZUG.md B5: alle Ordner abgleichen, pruefen, Quelle loeschen"):
+        pairs = [
+            ("dbglas", "share/dbglas"), ("server", "services/alt-truenas"), ("psycho", "share/lmlzr"),
+            ("jellyfin/Music", "media/Music"), ("jellyfin/Movies", "media/Movies"), ("jellyfin/TV", "media/TV"),
+        ]
+        for src, dst in pairs:
+            machine.succeed(f"rsync -aH --delete /mnt/tank/{src}/ /mnt/tank/{dst}/")
+            assert check(f"/mnt/tank/{src}", f"/mnt/tank/{dst}") == "OK", src
+            machine.succeed(f"diff -r /mnt/tank/{src} /mnt/tank/{dst}")
+            machine.succeed(f"rm -rf /mnt/tank/{src}")
+        # Abgleich hat Aenderungen nach dem Vorab-Kopieren uebernommen
+        machine.succeed("grep -q mehr /mnt/tank/media/Movies/Film1/film.mkv")
+        machine.succeed("test -f /mnt/tank/media/Movies/Film2/neu.mkv")
+        machine.fail("test -e /mnt/tank/media/Music/alt.mp3")
+        machine.succeed("chown -R lmlzr:users /mnt/tank/share/lmlzr")
         machine.succeed(
-            "rm -rf /mnt/tank/jellyfin/lancache",
-            "rsync -aHAX /mnt/tank/dbglas/ /mnt/tank/share/dbglas/ && diff -r /mnt/tank/dbglas /mnt/tank/share/dbglas && rm -rf /mnt/tank/dbglas",
-            "rsync -aHAX /mnt/tank/server/ /mnt/tank/services/ && diff -r /mnt/tank/server/zeug /mnt/tank/services/zeug && rm -rf /mnt/tank/server",
-            "rsync -aHAX /mnt/tank/psycho/ /mnt/tank/share/lmlzr/ && diff -r /mnt/tank/psycho /mnt/tank/share/lmlzr && rm -rf /mnt/tank/psycho",
-            "for d in Music Movies TV; do rsync -aHAX /mnt/tank/jellyfin/$d/ /mnt/tank/media/$d/ && diff -r /mnt/tank/jellyfin/$d /mnt/tank/media/$d && rm -rf /mnt/tank/jellyfin/$d; done",
             "rmdir /mnt/tank/jellyfin",
-            # Rechte gezielt pro Dataset, kein chmod 777
+            # B6: Rechte gezielt, kein chmod 777
             "chown -R root:media /mnt/tank/media/Music /mnt/tank/media/Movies /mnt/tank/media/TV",
             "find /mnt/tank/media/Music /mnt/tank/media/Movies /mnt/tank/media/TV -type d -exec chmod 2775 {} +",
             "find /mnt/tank/media/Music /mnt/tank/media/Movies /mnt/tank/media/TV -type f -exec chmod 664 {} +",
-            "chown -R lmlzr:users /mnt/tank/share/lmlzr",
         )
         machine.succeed("stat -c '%u' /mnt/tank/share/dbglas/Daten/a.txt | grep 1003")
+        machine.succeed("test -f /mnt/tank/services/alt-truenas/zeug/x")
         machine.succeed("ls /mnt/tank | sort | tr '\\n' ' ' | grep -x 'iocage lancache media services share '")
 
     with subtest("Neustart: Pool wird automatisch importiert, alles haengt, Dienste laufen"):

@@ -70,7 +70,8 @@ Ohne SMTP landen Panel-Mails (z. B. Passwort-Reset) nur im Log
 
 ZFS-Pool `tank`: Mirror aus 2× 16 TB (`wwn-0x5000c500e7ab0441`, `wwn-0x5000c500e7aafd88`).
 Konfiguration in `Hardware/storage.nix`, Pfade zentral in `modules/storage-paths.nix`.
-Umzug von TrueNAS, Plattentausch, Snapshots, L2ARC: **[docs/NAS-Migration.md](docs/NAS-Migration.md)**.
+Befehle für den Umzug von TrueNAS (vorher/nachher, pro Ordner): **[docs/UMZUG.md](docs/UMZUG.md)**.
+Hintergründe, Plattentausch, Snapshots, L2ARC: **[docs/NAS-Migration.md](docs/NAS-Migration.md)**.
 
 | Dataset | Pfad | Inhalt | Snapshots |
 |---|---|---|---|
