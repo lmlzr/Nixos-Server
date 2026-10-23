@@ -39,7 +39,12 @@
       ./services/steam-lancache-prefill.nix
       ./services/arr-stack/default.nix
       ./services/pterodactyl
+      ./services/checkmk-agent
     ];
+
+  # Checkmk-Agent (Pull, TCP 6556). Am besten auf die IP des Checkmk-Servers einschraenken:
+  # services.checkmk-agent.allowedFrom = [ "10.0.0.x" ];
+  services.checkmk-agent.enable = true;
 
   # Daten-HDDs nach 15 min Leerlauf abschalten (nur echte Hardware)
   nas.spindown.enable = true;

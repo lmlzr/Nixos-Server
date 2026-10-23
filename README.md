@@ -18,6 +18,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Radarr | http://neotokyo:7878 | LAN | |
 | Lidarr | http://neotokyo:8686 | LAN | |
 | Prowlarr | http://neotokyo:9696 | LAN | |
+| Seerr | http://neotokyo:5055 | LAN | Film-/Serienwünsche (früher Jellyseerr); Einrichtung siehe unten |
 | qBittorrent | http://neotokyo:8080 | LAN | läuft im VPN-Namespace; vom Server selbst: `192.168.15.1:8080` |
 | Pterodactyl Panel | http://10.0.0.5:8090 | LAN | über die IP öffnen (`APP_URL`) |
 | Portainer | https://neotokyo:9443 | LAN | Docker-Verwaltung; Port 8000 nur für Edge-Agents |
@@ -30,6 +31,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Lancache | 80/tcp, 443/tcp | LAN | nur auf `10.0.0.5`; Clients brauchen DNS-Umleitung der Spiele-Domains |
 | Samba | 139/tcp, 445/tcp, 137–138/udp | LAN | nur auf der LAN-Schnittstelle und nur aus privaten Netzen, siehe „Speicher (NAS)“ |
 | Windows-Netzwerkerkennung (wsdd) | 5357/tcp, 3702/udp | LAN | Server erscheint unter „Netzwerk“ |
+| Checkmk-Agent | 6556/tcp | LAN | nur LAN-Schnittstelle, nur vom Checkmk-Server `10.0.0.3` |
 | Jellyfin (Discovery) | 1900/udp, 7359/udp | LAN | Clients finden den Server im LAN |
 | Pterodactyl Wings API | 8443/tcp | LAN | Browser-Konsole und Panel sprechen Wings hierüber an |
 | Pterodactyl SFTP | 2022/tcp | LAN | Dateizugriff auf Gameserver, Login mit Panel-Benutzer |
@@ -82,7 +84,7 @@ Zustand: `sudo hdparm -C /dev/disk/by-id/wwn-0x5000c500e7ab0441`.
 
 Dienst-Daten liegen auf dem Pool und werden per Bind-Mount eingehängt (`modules/links.nix`):
 `/var/lib/<dienst>` ← `/mnt/tank/services/<dienst>` für Jellyfin, Audiobookshelf, Stirling-PDF,
-Sonarr, Radarr, Lidarr, Prowlarr, qBittorrent, MariaDB (`mysql`), Portainer, Pterodactyl
+Sonarr, Radarr, Lidarr, Prowlarr, Seerr, qBittorrent, MariaDB (`mysql`), Portainer, Pterodactyl
 (`pterodactyl-panel`, `pterodactyl-wings`). Docker-Images selbst liegen in `/var/lib/docker` auf der Systemplatte. Fehlt der Pool, bootet das System trotzdem, diese Dienste starten dann aber nicht.
 
 **Samba-Freigaben** (`services/smb.nix`, nur SMB2+, keine Gäste, nur private Netze):
@@ -103,6 +105,22 @@ nix build .#checks.x86_64-linux.pterodactyl -L
 **Test-VM ohne Pool:** in `configuration.nix` die vier NAS-Zeilen (`Hardware/storage.nix` …
 `modules/backup.nix`) auskommentieren. Die Pfade unter `/mnt/tank` sind dann normale Ordner.
 
+## Monitoring (Checkmk)
+
+`services/checkmk-agent/`: offizieller Linux-Agent 2.5.0p7 (Bash-Skript von Checkmk, gleiche Version wie der Server) im
+klassischen Pull-Modus auf TCP 6556, unverschlüsselt im LAN. In nixpkgs gibt es dafür kein Paket.
+
+- Zugriff nur vom Checkmk-Server `10.0.0.3` (und lokal), eingestellt in `configuration.nix`
+  (`services.checkmk-agent.allowedFrom`). Zusätzlich ist der Port nur auf der LAN-Schnittstelle offen.
+- Im Checkmk-Server den Host mit „Checkmk agent / API integrations“ anlegen. Ist dort die Regel
+  „Enforce agent data encryption“ aktiv, muss sie für diesen Host aus sein (kein TLS-Controller).
+- Test vom Server aus: `nc localhost 6556 | head`
+- Liefert u. a. CPU, RAM, Dateisysteme, Netzwerk, systemd-Units, ZFS-Pool und -Datasets.
+- SMART-Werte: das Plugin weckt schlafende HDDs, deshalb läuft es nur 1× täglich
+  (`services.checkmk-agent.smart.interval`). Die Werte in Checkmk sind daher bis zu 24 h alt.
+- Version des Agents möglichst gleich oder älter als die des Checkmk-Servers
+  (`services/checkmk-agent/package.nix`).
+
 ## Secrets
 
 Liegen nicht im Repo, sondern auf dem Server unter `/etc/secrets/` (Dateien `0600`):
@@ -117,4 +135,7 @@ Fehlt eine Datei, startet der jeweilige Dienst nicht.
 
 - Samba-Passwörter: `sudo smbpasswd -a lmlzr` und `sudo smbpasswd -a dbglas`
 - SteamPrefill: `cd /var/lib/steam-prefill && SteamPrefill select-apps`
+- Seerr (http://neotokyo:5055): beim ersten Aufruf „Jellyfin“ wählen, Server `http://localhost:8096`,
+  mit dem Jellyfin-Admin anmelden. Danach unter *Settings → Services* Radarr (`http://localhost:7878`)
+  und Sonarr (`http://localhost:8989`) mit deren API-Key (*Settings → General* in Radarr/Sonarr) eintragen.
 - *arr: qBittorrent als Download-Client unter `192.168.15.1:8080` eintragen, Medien unter `/mnt/tank/media`, Downloads unter `/mnt/tank/media/downloads`

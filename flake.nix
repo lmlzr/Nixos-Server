@@ -32,6 +32,7 @@
       in {
         nas-migration = import ./tests/nas-migration.nix { inherit pkgs; };
         pterodactyl = import ./tests/pterodactyl.nix { inherit pkgs; };
+        checkmk-agent = import ./tests/checkmk-agent.nix { inherit pkgs; };
       };
   };
 }
