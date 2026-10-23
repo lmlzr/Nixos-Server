@@ -7,7 +7,8 @@
   hardware = {
     nvidia = {
       modesetting.enable = true;
-      package = config.boot.kernelPackages.nvidiaPackages.latest;
+      # Quadro P400 (Pascal): ab Treiber 590 nicht mehr unterstuetzt, daher 580er-Legacy-Zweig
+      package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
       nvidiaSettings = false;
       open = false;
     };
