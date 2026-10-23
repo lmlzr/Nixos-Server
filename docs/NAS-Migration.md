@@ -4,6 +4,11 @@ Dieser Ablauf wurde im VM-Test `tests/nas-migration.nix` mit einem nachgebauten
 TrueNAS-Mirror durchgespielt (`nix build .#checks.x86_64-linux.nas-migration -L`).
 Am echten Pool läuft nichts automatisch – jeden Befehl selbst ausführen und die Ausgabe prüfen.
 
+> **Zum Abarbeiten: [UMZUG.md](UMZUG.md)** – alle Befehle vor und nach dem Umzug, ein Block pro
+> Ordner, Reihenfolge frei, Ordner können vorab unter TrueNAS kopiert werden. Diese Datei hier
+> erklärt Hintergründe, Rückweg und Wartung; Phasen C–F unten sind die ursprüngliche Variante
+> ohne Vorab-Kopie.
+
 ## Ausgangslage (Bestandsaufnahme 22.10.2026)
 
 | | |
