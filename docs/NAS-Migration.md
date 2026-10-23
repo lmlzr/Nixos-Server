@@ -51,13 +51,11 @@ damit Sonarr/Radarr Hardlinks und schnelle Verschiebungen nutzen können.
    (zusammen ~1 TB). Der Umzug ist risikoarm, aber ein Mirror ist kein Backup.
 2. In TrueNAS **alle Aufgaben abschalten**: Periodic Snapshot Tasks, Replication, Scrub Tasks,
    Cloud Sync, Rsync Tasks.
-3. **Scrub in TrueNAS laufen lassen** (dauert ~12 h) und abwarten:
+3. Zustand festhalten (in der TrueNAS-Shell), **kein Scrub** – der kommt nach dem Umbau (Phase F):
    ```bash
-   zpool scrub TB1
    zpool status -v TB1
    ```
-   Erwartet am Ende: `scrub repaired 0B … with 0 errors`, `errors: No known data errors`.
-   So ist sicher, dass beide Platten vor dem Umzug fehlerfreie Daten haben.
+   Erwartet: `state: ONLINE`, `errors: No known data errors`.
 4. Dienste mit Daten auf `TB1` stoppen, TrueNAS-VM **herunterfahren**.
    **Nicht** „Export/Disconnect“ im TrueNAS-Menü verwenden (dort ist „Destroy data“ eine Option).
 5. Proxmox-Host herunterfahren.
@@ -219,11 +217,16 @@ Besitzer setzen, Dienst neu starten; danach den Ordner `alt-truenas` löschen.
    sudo systemctl start zfs-health; journalctl -u zfs-health -n 3
    ```
 3. Neustart-Test: neu starten, dann erneut `findmnt -t zfs` und `systemctl --failed`.
-4. Ein zusätzlicher Scrub nach dem Umzug ist **nicht nötig**: Beim Kopieren mit `rsync` wurde
-   jeder Block gelesen und dabei von ZFS gegen seine Prüfsumme geprüft, und beim Schreiben
-   bekommt jeder neue Block seine Prüfsumme. Der monatliche `zfs-scrub.timer` übernimmt danach.
-   Wer sofort Gewissheit für die neu geschriebenen Daten will, kann `sudo zpool scrub tank`
-   trotzdem starten (dauert ~12 h, Platten laufen so lange).
+4. **Scrub starten** – der erste unter NixOS, über den ganzen Pool inklusive der neu
+   geschriebenen Daten (dauert ~12 h, die Platten laufen so lange durch):
+   ```bash
+   sudo zpool scrub tank
+   sudo zpool status tank                 # Fortschritt
+   ```
+   Erwartet am Ende: `scrub repaired 0B … with 0 errors`, `errors: No known data errors`.
+   Werden Fehler repariert oder gemeldet: `zpool status -v tank` zeigt betroffene Dateien,
+   dann SMART-Werte beider Platten prüfen (siehe „Überwachung“). Danach übernimmt der monatliche
+   `zfs-scrub.timer`.
 5. Erst wenn alles einige Tage läuft: optional `sudo zpool upgrade tank`
    (danach kein Rückweg zu TrueNAS mehr).
 
