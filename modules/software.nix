@@ -20,5 +20,6 @@
     tmux
     fastfetch
     claude-code
+    wireguard-tools
   ];
 }
