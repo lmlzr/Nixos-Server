@@ -25,7 +25,7 @@ pkgs.testers.runNixOSTest {
 
     with subtest("Agent liefert Daten"):
         out = server.succeed("${pkgs.netcat}/bin/nc -N 127.0.0.1 6556 < /dev/null || ${pkgs.netcat}/bin/nc 127.0.0.1 6556 < /dev/null")
-        for s in ["<<<check_mk>>>", "Version: 2.5.0p17", "<<<df", "<<<mem>>>", "<<<cpu>>>", "<<<zpool_status>>>", "<<<zfsget>>>"]:
+        for s in ["<<<check_mk>>>", "Version: 2.5.0p7", "<<<df", "<<<mem>>>", "<<<cpu>>>", "<<<zpool_status>>>", "<<<zfsget>>>"]:
             assert s in out, f"{s} fehlt"
 
     with subtest("Asynchrone Teile laufen"):

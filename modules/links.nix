@@ -18,6 +18,8 @@ let
     "/var/lib/radarr"               = { enable = config.services.radarr.enable;         service = "radarr";         source = "${root}/radarr";         owner = "radarr:media"; };
     "/var/lib/lidarr"               = { enable = config.services.lidarr.enable;         service = "lidarr";         source = "${root}/lidarr";         owner = "lidarr:media"; };
     "/var/lib/private/prowlarr"     = { enable = config.services.prowlarr.enable;       service = "prowlarr";       source = "${root}/prowlarr";       owner = "root:root"; };
+    # Seerr (DynamicUser)
+    "/var/lib/private/seerr"        = { enable = config.services.seerr.enable;          service = "seerr";          source = "${root}/seerr";          owner = "root:root"; };
     "/var/lib/qBittorrent"          = { enable = config.services.qbittorrent.enable;    service = "qbittorrent";    source = "${root}/qbittorrent";    owner = "qbittorrent:media"; };
     # MariaDB (Datenbank des Pterodactyl-Panels)
     "/var/lib/mysql"                = { enable = config.services.mysql.enable;          service = "mysql";          source = "${root}/mysql";          owner = "mysql:mysql"; };
