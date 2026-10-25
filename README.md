@@ -61,6 +61,16 @@ dessen Pfade. Damit Bibliotheken, Gesehen-Status und Bilder erhalten bleiben, bi
 Backup einspielen (Dienst vorher stoppen, Datei muss für `jellyfin` lesbar sein):
 `sudo -u jellyfin jellyfin --datadir /config/data --configdir /config/data/config --cachedir /var/cache/jellyfin --logdir /config/data/log --restore-archive <backup.zip>`
 
+### Streaming von außen
+
+Über `jellyfin.lmlzr.com` ist der Heim-Upload die Grenze (~38 Mbit/s nach dem Shaper).
+
+- Jellyfin: *Dashboard → Wiedergabe → Streaming* → Internet-Bitrate **10 Mbit/s** (1080p H.264).
+- OPNsense: *Firewall → Shaper* → Pipe 40 Mbit/s **FQ-CoDel** auf WAN out, gegen Bufferbloat
+  (vorher ~190 ms Ping unter Upload-Last, danach ~34 ms; ohne ihn ruckeln Streams trotz genug Bandbreite).
+- Puffert es trotzdem: Engpass ist meist der Mobilfunk am Gerät → in der Jellyfin-App die Bitrate für
+  Mobilfunk auf 4–6 Mbit/s setzen. Prüfen: In `/Sessions` liegt der Transcode weit vor der Wiedergabeposition.
+
 ## Lancache
 
 `services/lancache.nix` (nginx auf `10.0.0.5:80/443`, Cache in `tank/lancache`),
