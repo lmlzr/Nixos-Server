@@ -1,8 +1,10 @@
 { config, lib, pkgs, ... }:
 
 # ZFS-Pool "tank": Mirror aus 2x 16 TB (wwn-0x5000c500e7ab0441, wwn-0x5000c500e7aafd88).
-# Ersetzt Hardware/hdds.nix. Pool und Datasets werden NICHT automatisch angelegt,
-# siehe docs/NAS-Migration.md.
+# ZFS-Pool "fast": WD Blue SN580 1 TB (NVMe, einzeln) nur fuer die Dienst-Daten,
+# naechtlich per syncoid nach tank/backup/services gesichert.
+# Ersetzt Hardware/hdds.nix. Pools und Datasets werden NICHT automatisch angelegt,
+# siehe docs/NAS-Migration.md und docs/SSD-SERVICES.md.
 let
   cfg = config.nas;
 
@@ -11,7 +13,7 @@ let
     ${cfg.root} = cfg.pool;
     ${cfg.mediaDir} = "${cfg.pool}/media";
     ${cfg.shareDir} = "${cfg.pool}/share";
-    ${cfg.servicesDir} = "${cfg.pool}/services";
+    ${cfg.servicesDir} = cfg.servicesDataset;
     ${cfg.lancacheDir} = "${cfg.pool}/lancache";
   };
 
@@ -83,7 +85,20 @@ in
   services.zfs.autoScrub = {
     enable = true;
     interval = "monthly";
-    pools = [ cfg.pool ];
+    pools = [ cfg.pool ] ++ lib.optional (cfg.fastPool != null) cfg.fastPool;
+  };
+
+  # Naechtliche Kopie der Dienst-Daten von der SSD auf den HDD-Pool. Nutzt die
+  # sanoid-Snapshots (kein eigener Sync-Snapshot); weckt die HDDs einmal pro Nacht.
+  # Ziel wird nicht eingehaengt (mountpoint=legacy von tank geerbt, -u beim Empfang).
+  services.syncoid = lib.mkIf (cfg.fastPool != null) {
+    enable = true;
+    interval = lib.mkDefault "*-*-* 03:30:00";
+    commands.${cfg.servicesDataset} = {
+      target = cfg.servicesBackupDataset;
+      recvOptions = "u";
+      extraArgs = [ "--no-sync-snap" ];
+    };
   };
 
   environment.systemPackages = with pkgs; [

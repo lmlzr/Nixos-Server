@@ -18,7 +18,7 @@ in
 
     datasets = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ "${config.nas.pool}/share" "${config.nas.pool}/services" ];
+      default = [ "${config.nas.pool}/share" config.nas.servicesDataset ];
       description = "Zu sichernde Datasets. Medien bewusst nicht (wiederbeschaffbar).";
     };
 
