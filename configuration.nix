@@ -43,6 +43,7 @@
       ./services/seerr.nix
       ./services/pterodactyl
       ./services/checkmk-agent
+      ./services/claude-rc.nix
     ];
 
   # Checkmk-Agent (Pull, TCP 6556), nur fuer den Checkmk-Server
