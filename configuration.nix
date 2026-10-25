@@ -42,6 +42,7 @@
       ./services/arr-stack/default.nix
       ./services/seerr.nix
       ./services/pterodactyl
+      ./services/gameserver-ports.nix
       ./services/checkmk-agent
       ./services/claude-rc.nix
     ];
