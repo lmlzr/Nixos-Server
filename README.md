@@ -93,11 +93,33 @@ Einrichtung nach dem ersten Rebuild:
 4. Bei der Node unter *Configuration* den Inhalt nach `/etc/pterodactyl/config.yml` kopieren
    (`sudo nano /etc/pterodactyl/config.yml`), dann `sudo systemctl restart wings`.
    Vorher startet Wings absichtlich nicht.
-5. Unter *Allocation* die IP `10.0.0.5` mit den Ports `25565-25600` anlegen.
+5. Unter *Allocation* die IP `10.0.0.5` mit den Ports aus `services/gameserver-ports.nix` anlegen.
 
 Ohne SMTP landen Panel-Mails (z. B. Passwort-Reset) nur im Log
 (`/var/lib/pterodactyl-panel/storage/logs`). SMTP lässt sich über
 `services.pterodactyl.panel.settings` einstellen.
+
+### Gameserver von außen (lmlzr.com)
+
+Der VPS leitet die Spieleports per nftables durch WireGuard an `10.0.0.5` weiter (TCP+UDP,
+ersetzt HAProxy). Portliste zentral in `services/gameserver-ports.nix` (öffnet die Firewall),
+gleiche Liste auf dem VPS in `vps/nftables-gameforward.conf`. Einrichtung auf dem VPS:
+`vps/setup-gameforward.sh` (Rückweg steht im Skript). Neue Ports: beide Dateien anpassen,
+im Panel als Allocation anlegen.
+
+| Spiel | Port(s) | Adresse für Spieler |
+|---|---|---|
+| Minecraft Java | 25565–25600 tcp+udp | `minecraft.lmlzr.com` (SRV-Eintrag pro Server) |
+| Minecraft Bedrock | 19132–19133 udp | `minecraft.lmlzr.com:19132` |
+| Hytale | 5520–5529 udp | `hytale.lmlzr.com` |
+| Satisfactory | 7777 tcp+udp, 8888 tcp | `satisfactory.lmlzr.com` |
+| ARK | 7787–7790 udp | `ark.lmlzr.com:7787` (7777 belegt Satisfactory) |
+| Don't Starve Together | 10999–11010, 8766–8770, 27018–27019 udp | über die Serverliste |
+| CS2 | 27015–27020 tcp+udp | `connect cs2.lmlzr.com` |
+| Rust | 28015 + 28017 udp, 28082 tcp (Rust+) | `client.connect rust.lmlzr.com:28015` |
+
+Cloudflare: alle Spiele-Einträge **„DNS only“ (graue Wolke)**, der Cloudflare-Proxy leitet keine
+Spiele weiter. Die Gameserver sehen als Absender `10.10.0.1`, nicht die Spieler-IP.
 
 ## Speicher (NAS)
 
