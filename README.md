@@ -5,7 +5,8 @@ Nixos Server config for switching von proxmox to nix
 
 Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 **Erreichbar:** *LAN* = aus dem Heimnetz, *lokal* = nur auf dem Server selbst.
-Öffentlicher Zugang über den VPS ist noch nicht eingerichtet.
+Öffentlich ist nur Jellyfin unter https://jellyfin.lmlzr.com (nginx auf dem VPS, per WireGuard
+`10.10.0.1` → `10.0.0.5:8096`; `10.10.0.1` steht in Jellyfin als bekannter Proxy).
 
 ### Weboberflächen
 
@@ -22,6 +23,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | qBittorrent | http://neotokyo:8080 | LAN | läuft im VPN-Namespace; vom Server selbst: `192.168.15.1:8080` |
 | Pterodactyl Panel | http://10.0.0.5:8090 | LAN | über die IP öffnen (`APP_URL`) |
 | Portainer | https://neotokyo:9443 | LAN | Docker-Verwaltung; Port 8000 nur für Edge-Agents |
+| Lancache-Dashboard | http://neotokyo:3000 | LAN | Downloads, HIT/MISS, Clients, gecachte Spiele; siehe „Lancache“ |
 
 ### Sonstige Ports
 
@@ -39,9 +41,40 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | MariaDB | Socket | lokal | nur Unix-Socket, für das Panel |
 | Redis (Pterodactyl) | Socket | lokal | nur Unix-Socket |
 | Lancache Metrics | 8080/tcp | lokal | nginx auf `localhost`; aus dem LAN geht 8080 an qBittorrent |
+| FlareSolverr | 8191/tcp | lokal | Cloudflare-Umgehung für Prowlarr (`services/arr-stack/flaresolverr.nix`) |
 
 Laufen inzwischen auf einem anderen Host (hier auskommentiert): Home Assistant, Karakeep,
 Mealie, Syncthing, Mosquitto, Firefox.
+
+## Jellyfin (aus Docker-Backup)
+
+Datenbank und Einstellungen stammen aus einem Backup des früheren Docker-Jellyfin und enthalten
+dessen Pfade. Damit Bibliotheken, Gesehen-Status und Bilder erhalten bleiben, bildet
+`services/jellyfin.nix` die alten Pfade nach, statt die Datenbank umzuschreiben:
+
+- `dataDir = "/config/data"`: Bind-Mount von `/mnt/tank/services/jellyfin` (dieselben Daten wie
+  `/var/lib/jellyfin`). Muss ein echter Mount sein, kein Symlink: Jellyfin vergleicht die
+  Bibliothekspfade als Text, sonst „Die Bibliothek ist in einem ungültigen Zustand“.
+- Symlinks: `/config/cache` → `/var/cache/jellyfin`, `/data/movies` → `/mnt/tank/media/Movies`,
+  `/data/tvshows` → `TV`, `/data/Books` → `Books`, `/data/music` → `Music`.
+
+Backup einspielen (Dienst vorher stoppen, Datei muss für `jellyfin` lesbar sein):
+`sudo -u jellyfin jellyfin --datadir /config/data --configdir /config/data/config --cachedir /var/cache/jellyfin --logdir /config/data/log --restore-archive <backup.zip>`
+
+## Lancache
+
+`services/lancache.nix` (nginx auf `10.0.0.5:80/443`, Cache in `tank/lancache`),
+`services/steam-lancache-prefill.nix` (SteamPrefill täglich ab 04:00, nur Updates nach dem ersten Lauf).
+
+- **DNS (Pi-hole auf `10.0.0.3`):** die Spiele-Domains stehen dort in `misc.dnsmasq_lines` als
+  `address=/<domain>/10.0.0.5`. Zu jeder Zeile gehört zusätzlich `local=/<domain>/`, sonst gibt
+  Pi-hole für IPv6 (AAAA) die echten CDN-Adressen zurück und Steam umgeht den Cache.
+  Prüfen: `dig +short AAAA lancache.steamcontent.com @10.0.0.3` muss leer sein.
+- Steam erkennt den Cache nur beim Start; im Steam-Log `content_log.txt` steht dann
+  `Enabling local content cache at …10.0.0.5`.
+- **Dashboard** (`containers/lancache-dashboard.nix`, [imahmud1/lancache-dashboard](https://github.com/imahmud1/lancache-dashboard)):
+  liest `/var/log/nginx/lancache/access.log` (Container mit Gruppe `nginx`), Datenbank unter
+  `/mnt/tank/services/lancache-dashboard`. Prefill-Traffic (`10.0.0.5`) ist aus der Client-Statistik ausgeblendet.
 
 ## Pterodactyl
 
@@ -140,3 +173,15 @@ Fehlt eine Datei, startet der jeweilige Dienst nicht.
   mit dem Jellyfin-Admin anmelden. Danach unter *Settings → Services* Radarr (`http://localhost:7878`)
   und Sonarr (`http://localhost:8989`) mit deren API-Key (*Settings → General* in Radarr/Sonarr) eintragen.
 - *arr: qBittorrent als Download-Client unter `192.168.15.1:8080` eintragen, Medien unter `/mnt/tank/media`, Downloads unter `/mnt/tank/media/downloads`
+  (nicht `neotokyo:8080`: die Portweiterleitung in den VPN-Namespace greift nur für Zugriffe aus dem LAN)
+- qBittorrent: ohne eigenes Passwort erzeugt es bei jedem Start ein temporäres
+  (`journalctl -u qbittorrent | grep -i "temporäres Passwort"`, Benutzer `admin`).
+  Unter *Optionen → WebUI* ein festes setzen und in Sonarr/Radarr/Lidarr eintragen.
+- FlareSolverr in Prowlarr: *Settings → Indexers → + → FlareSolverr*, Host `http://127.0.0.1:8191/`,
+  Tag vergeben und denselben Tag bei Indexern hinter Cloudflare setzen.
+- Schreibrechte der Medienordner für die Gruppe `media` (inkl. Vererbung auf neue Dateien):
+  ```bash
+  sudo bash -c 'for D in /mnt/tank/media/{Movies,TV,Music,Books,Audiobooks,Comics,Manga,downloads}; do
+    chown -R root:media "$D"; chmod -R g+rwX "$D"; find "$D" -type d -exec chmod g+s {} +
+    setfacl -R -m g:media:rwX "$D"; setfacl -R -d -m g:media:rwX "$D"; done'
+  ```

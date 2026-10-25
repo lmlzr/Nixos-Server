@@ -22,6 +22,7 @@
       ./users/dbglas.nix
 
       ./containers/portainer.nix
+      ./containers/lancache-dashboard.nix
       #./containers/firefox.nix
 
       ./services/jellyfin.nix

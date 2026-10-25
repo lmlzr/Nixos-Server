@@ -6,6 +6,7 @@
     ./radarr.nix
     ./lidarr.nix
     ./prowlarr.nix
+    ./flaresolverr.nix
     ./qbittorrent.nix
   ];
 
