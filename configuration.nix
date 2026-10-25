@@ -17,6 +17,7 @@
       ./modules/storage-monitoring.nix
       ./modules/backup.nix
       ./modules/hdd-spindown.nix
+      ./modules/power.nix
 
       ./users/lmlzr.nix
       ./users/dbglas.nix

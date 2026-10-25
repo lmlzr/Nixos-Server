@@ -11,6 +11,8 @@
       package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
       nvidiaSettings = false;
       open = false;
+      # Treiber dauerhaft geladen: GPU bleibt im Stromsparzustand P8, Transcodes starten schneller
+      nvidiaPersistenced = true;
     };
     graphics = {
       enable = true;
