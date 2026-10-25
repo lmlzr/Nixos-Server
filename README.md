@@ -165,6 +165,12 @@ klassischen Pull-Modus auf TCP 6556, unverschlüsselt im LAN. In nixpkgs gibt es
 - Version des Agents möglichst gleich oder älter als die des Checkmk-Servers
   (`services/checkmk-agent/package.nix`).
 
+## Claude Code Remote Control
+
+`services/claude-rc.nix` startet beim Booten `claude remote-control` im Home-Ordner von lmlzr
+(eigene tmux-Sitzung, die Trust-Frage fürs Home-Verzeichnis wird automatisch bestätigt).
+Ansehen: `tmux -L claude-rc attach` (verlassen: Strg+B, D) · Neustart: `sudo systemctl restart claude-rc`
+
 ## Secrets
 
 Liegen nicht im Repo, sondern auf dem Server unter `/etc/secrets/` (Dateien `0600`):
