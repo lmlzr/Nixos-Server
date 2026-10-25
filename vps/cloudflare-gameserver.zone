@@ -1,0 +1,17 @@
+; Cloudflare-Import fuer example.com: Gameserver auf neotokyo (ueber VPS 203.0.113.10)
+; Import: DNS -> Records -> Import and Export -> Import DNS records -> diese Datei
+; WICHTIG: Haken "Proxy imported DNS records" NICHT setzen (Spiele brauchen "DNS only")
+; TTL 1 = "Auto" bei Cloudflare
+$ORIGIN example.com.
+
+minecraft     1 IN A   203.0.113.10
+hytale        1 IN A   203.0.113.10
+satisfactory  1 IN A   203.0.113.10
+ark           1 IN A   203.0.113.10
+cs2           1 IN A   203.0.113.10
+rust          1 IN A   203.0.113.10
+dst           1 IN A   203.0.113.10
+
+; Minecraft Java: Port automatisch per SRV (Spieler geben nur minecraft.example.com ein)
+; Priority Weight Port Target
+_minecraft._tcp.minecraft  1 IN SRV 0 5 25565 minecraft.example.com.
