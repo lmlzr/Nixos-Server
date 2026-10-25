@@ -118,6 +118,11 @@ Pool `fast`: einzelne NVMe (WD Blue SN580 1 TB) nur für die Dienst-Daten, damit
 schlafen können. Kein Mirror, deshalb die nächtliche Kopie auf `tank`.
 Einrichtung und Wiederherstellung: **[docs/SSD-SERVICES.md](docs/SSD-SERVICES.md)**.
 
+Lese-Cache (L2ARC) von `tank`: Intenso SATA-SSD 256 GB, nur Metadaten (`secondarycache=metadata`),
+übersteht Neustarts. Ohne ihn liest der nginx-Cache-Loader des Lancache nach jedem nginx-Start
+~15 min lang die Datei-Infos aller Cache-Dateien von den HDDs. Fällt die SSD aus, läuft `tank`
+ohne Cache weiter. Entfernen: `sudo zpool remove tank ata-INTENSO_5680079419EE00164834`.
+
 Spindown: die beiden HDDs schalten nach 15 min Leerlauf ab (`modules/hdd-spindown.nix`, hd-idle);
 Zustand: `sudo hdparm -C /dev/disk/by-id/wwn-0x5000c500e7ab0441`.
 
