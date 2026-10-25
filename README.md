@@ -110,14 +110,19 @@ Hintergründe, Plattentausch, Snapshots, L2ARC: **[docs/NAS-Migration.md](docs/N
 |---|---|---|---|
 | `tank/media` | `/mnt/tank/media` | Filme, Serien, Musik …, `downloads/` | 7 Tage |
 | `tank/share` | `/mnt/tank/share` | `lmlzr/`, `dbglas/` | 30 Tage, 6 Monate |
-| `tank/services` | `/mnt/tank/services` | Daten der Dienste (s. u.) | 14 Tage, 3 Monate |
 | `tank/lancache` | `/mnt/tank/lancache` | Spiele-Cache, max. 2 TB | keine |
+| `tank/backup/services` | – (nicht eingehängt) | nächtliche Kopie von `fast/services` (syncoid, 03:30) | 30 Tage, 6 Monate |
+| `fast/services` | `/mnt/fast/services` | Daten der Dienste (s. u.), auf der NVMe | 24 Stunden, 14 Tage, 3 Monate |
+
+Pool `fast`: einzelne NVMe (WD Blue SN580 1 TB) nur für die Dienst-Daten, damit die HDDs
+schlafen können. Kein Mirror, deshalb die nächtliche Kopie auf `tank`.
+Einrichtung und Wiederherstellung: **[docs/SSD-SERVICES.md](docs/SSD-SERVICES.md)**.
 
 Spindown: die beiden HDDs schalten nach 15 min Leerlauf ab (`modules/hdd-spindown.nix`, hd-idle);
 Zustand: `sudo hdparm -C /dev/disk/by-id/wwn-0x5000c500e7ab0441`.
 
 Dienst-Daten liegen auf dem Pool und werden per Bind-Mount eingehängt (`modules/links.nix`):
-`/var/lib/<dienst>` ← `/mnt/tank/services/<dienst>` für Jellyfin, Audiobookshelf, Stirling-PDF,
+`/var/lib/<dienst>` ← `/mnt/fast/services/<dienst>` für Jellyfin, Audiobookshelf, Stirling-PDF,
 Sonarr, Radarr, Lidarr, Prowlarr, Seerr, qBittorrent, MariaDB (`mysql`), Portainer, Pterodactyl
 (`pterodactyl-panel`, `pterodactyl-wings`). Docker-Images selbst liegen in `/var/lib/docker` auf der Systemplatte. Fehlt der Pool, bootet das System trotzdem, diese Dienste starten dann aber nicht.
 

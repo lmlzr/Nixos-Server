@@ -31,10 +31,31 @@ in
       description = "Dataset <pool>/share: persoenliche und allgemeine Dateien.";
     };
 
+    fastPool = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = "fast";
+      description = ''
+        ZFS-Pool auf SSD fuer die Dienst-Daten, damit die HDDs in den Spindown gehen koennen.
+        null = Dienst-Daten liegen auf dem HDD-Pool (z. B. Test-VM).
+      '';
+    };
+
+    servicesDataset = lib.mkOption {
+      type = lib.types.str;
+      default = if cfg.fastPool != null then "${cfg.fastPool}/services" else "${cfg.pool}/services";
+      description = "Dataset mit den Daten der Dienste.";
+    };
+
     servicesDir = lib.mkOption {
       type = lib.types.str;
-      default = "${cfg.root}/services";
-      description = "Dataset <pool>/services: Daten der Dienste (per Bind-Mount nach /var/lib).";
+      default = if cfg.fastPool != null then "/mnt/${cfg.fastPool}/services" else "${cfg.root}/services";
+      description = "Mountpoint von servicesDataset: Daten der Dienste (per Bind-Mount nach /var/lib).";
+    };
+
+    servicesBackupDataset = lib.mkOption {
+      type = lib.types.str;
+      default = "${cfg.pool}/backup/services";
+      description = "Naechtliche Kopie von servicesDataset auf dem HDD-Pool (nur mit fastPool).";
     };
 
     lancacheDir = lib.mkOption {

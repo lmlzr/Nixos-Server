@@ -29,6 +29,8 @@ pkgs.testers.runNixOSTest {
     virtualisation.fileSystems = config.nas.mounts;
     services.smartd.enable = lib.mkForce false;
     nas.lanInterface = "eth1";
+    # Test-VM hat keine SSD: Dienst-Daten wie frueher auf tank/services
+    nas.fastPool = null;
     environment.systemPackages = [ pkgs.samba ];
   };
 
