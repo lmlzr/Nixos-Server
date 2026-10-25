@@ -12,6 +12,8 @@
 
   # SATA-Link-Stromsparen fuer alle Controller (Boot-SSD, L2ARC-SSD, HDDs).
   # Kontrolle: cat /sys/class/scsi_host/host*/link_power_management_policy
+  # Ausnahme: Boot-SSD Crucial BX500 bleibt max_performance (Kernel-Quirk nolpm, Firmware-Bug);
+  # DUMMY-Ports ohne Anschluss melden "Operation not supported" - beides ist normal.
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="scsi_host", KERNEL=="host*", ATTR{link_power_management_policy}="med_power_with_dipm"
   '';
