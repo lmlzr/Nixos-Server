@@ -119,7 +119,40 @@ im Panel als Allocation anlegen.
 | Rust | 28015 + 28017 udp, 28082 tcp (Rust+) | `client.connect rust.lmlzr.com:28015` |
 
 Cloudflare: alle Spiele-Einträge **„DNS only“ (graue Wolke)**, der Cloudflare-Proxy leitet keine
-Spiele weiter. Die Gameserver sehen als Absender `10.10.0.1`, nicht die Spieler-IP.
+Spiele weiter. Importdatei mit allen Einträgen: `vps/cloudflare-gameserver.zone`
+(*DNS → Records → Import and Export*, Haken „Proxy imported DNS records“ **nicht** setzen).
+Die Gameserver sehen als Absender `10.10.0.1`, nicht die Spieler-IP.
+
+**IONOS-Firewall** (Cloud Panel → VPS → *Netzwerk → Firewall-Richtlinien*): lässt nur freigegebene
+Ports zum VPS durch und muss dieselben Ports enthalten wie `vps/nftables-gameforward.conf`, sonst
+kommen die Pakete gar nicht erst an (Symptom: Timeout statt „Verbindung abgelehnt“). Freigegeben:
+
+| Protokoll | Ports |
+|---|---|
+| TCP | 22, 80, 443, 25565–25600, 7777–7790, 8888, 27015–27020, 28082 |
+| UDP | 51820 (WireGuard), 25565–25600, 19132–19133, 5520–5529, 7777–7790, 8766–8770, 10999–11010, 27015–27020, 28015, 28017 |
+
+**Weiterer Minecraft-Server** (z. B. `creative.lmlzr.com`): in Pterodactyl die nächste freie
+Allocation (25566, 25567, …) wählen und bei Cloudflare zwei Einträge anlegen, sonst nichts:
+
+```
+creative                    1 IN A    217.154.218.53
+_minecraft._tcp.creative    1 IN SRV  0 5 25566 creative.lmlzr.com.
+```
+
+Bei vielen Servern oder Wechsel ohne Neuverbinden: Velocity-Proxy davor (eine Adresse, `/server <name>`).
+
+**Test von außen** (Ende-zu-Ende über VPS und Tunnel, auch ohne laufenden Gameserver): auf neotokyo
+kurz Test-Empfänger starten und von einem anderen Rechner Pakete an `<spiel>.lmlzr.com:<port>` schicken:
+
+```bash
+# neotokyo (2 Minuten lang)
+nix shell nixpkgs#socat -c sh -c 'timeout 120 socat UDP-RECVFROM:7777,fork SYSTEM:"echo ok" & timeout 120 socat TCP-LISTEN:7777,fork,reuseaddr SYSTEM:"echo ok"'
+# anderer Rechner: Antwort "ok" = Port erreichbar
+echo ping | nix shell nixpkgs#socat -c socat -T4 - UDP:satisfactory.lmlzr.com:7777
+nix shell nixpkgs#socat -c socat -T4 - TCP:satisfactory.lmlzr.com:7777 </dev/null
+```
+Zuletzt geprüft am 25.10.2026: alle Ports der Tabelle oben erreichbar.
 
 ## Speicher (NAS)
 
