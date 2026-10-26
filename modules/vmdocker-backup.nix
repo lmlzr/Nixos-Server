@@ -9,14 +9,14 @@
 # Dataset einmalig anlegen:
 #   sudo zfs create -o mountpoint=legacy -o xattr=sa -o compression=zstd tank/backup/vmdocker
 # Wiederherstellen (auf der VM als root):
-#   rsync -aHAX --numeric-ids -M--fake-super -e "ssh -i /root/.ssh/backup_neotokyo" \
-#     vmdocker-backup@10.0.0.5:/docker/ /docker/
+#   rsync -aHX --numeric-ids -M--fake-super -e "ssh -i /root/.ssh/backup_neotokyo" \
+#     vmdocker-backup@10.0.0.5:docker/ /docker/
 let
   cfg = config.nas;
   dataset = "${cfg.pool}/backup/vmdocker";
   dir = "${cfg.root}/backup/vmdocker";
   user = "vmdocker-backup";
-  pubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIyLp6K9BK6qD9VuM48bWfOxk3qXQxv/PpI7GDut2Xwq vmdocker-backup";
+  pubKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFWpYLguJAoGDqJA6s9nzAOXTVlD5whlWHqN72qd/min vmdocker-backup";
 in
 {
   nas.mounts.${dir} = {
