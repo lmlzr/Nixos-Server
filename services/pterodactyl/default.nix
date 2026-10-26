@@ -65,6 +65,9 @@ let
       ${lib.concatStringsSep "\n      " (lib.mapAttrsToList (n: v: "echo ${lib.escapeShellArg "${n}=\"${v}\""}") env)}
       echo "APP_KEY=\"$(cat secrets/app-key)\""
       echo "HASHIDS_SALT=\"$(cat secrets/hashids-salt)\""
+      ${lib.optionalString (panelCfg.mailPassword.file != null) ''
+        echo "MAIL_PASSWORD=\"$(${pkgs.gnused}/bin/sed -n 's/^${panelCfg.mailPassword.key}=//p' "$CREDENTIALS_DIRECTORY/smtp")\""
+      ''}
     } > .env.tmp
     mv .env.tmp .env
 
@@ -129,6 +132,20 @@ in
         default = { };
         example = { MAIL_MAILER = "smtp"; MAIL_HOST = "smtp.example.com"; };
         description = "Zusaetzliche/ueberschriebene .env-Werte (keine Geheimnisse, landen im Nix-Store).";
+      };
+
+      mailPassword = {
+        file = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "/home/lmlzr/smtp-keys.env";
+          description = "Datei mit dem SMTP-Passwort als KEY=Wert-Zeile; wird per LoadCredential gelesen, nicht im Nix-Store.";
+        };
+        key = lib.mkOption {
+          type = lib.types.str;
+          default = "TOKEN_PTERODACTYL";
+          description = "Name der Zeile in mailPassword.file.";
+        };
       };
     };
 
@@ -204,6 +221,7 @@ in
           RemainAfterExit = true;
           StateDirectory = "pterodactyl-panel";
           StateDirectoryMode = "0750";
+          LoadCredential = lib.optional (panelCfg.mailPassword.file != null) "smtp:${panelCfg.mailPassword.file}";
           ExecStart = setupScript;
         };
       };

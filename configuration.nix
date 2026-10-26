@@ -17,6 +17,7 @@
       ./modules/zfs-snapshots.nix
       ./modules/storage-monitoring.nix
       ./modules/backup.nix
+      ./modules/vmdocker-backup.nix
       ./modules/hdd-spindown.nix
       ./modules/power.nix
 
@@ -59,6 +60,16 @@
 
   services.pterodactyl = {
     panel.enable = true;
+    # Mails (Passwort-Reset, Einladungen) ueber Proton; Token: TOKEN_PTERODACTYL
+    panel.settings = {
+      MAIL_MAILER = "smtp";
+      MAIL_HOST = "smtp.protonmail.ch";
+      MAIL_PORT = "587";
+      MAIL_ENCRYPTION = "tls";
+      MAIL_USERNAME = config.nas.mail.from;
+      MAIL_FROM_ADDRESS = config.nas.mail.from;
+    };
+    panel.mailPassword.file = config.nas.mail.envFile;
     wings.enable = true;
   };
 
