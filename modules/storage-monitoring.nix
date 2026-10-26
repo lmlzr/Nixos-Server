@@ -1,9 +1,10 @@
 { config, lib, pkgs, ... }:
 
-# Ueberwachung von Platten und Pool. Benachrichtigungen gehen vorerst nur ins
-# Journal und per wall an angemeldete Benutzer; Mail/ntfy folgt mit dem Backup-Konzept.
+# Ueberwachung von Platten und Pool. Benachrichtigungen gehen ins Journal, per wall an
+# angemeldete Benutzer und per Mail an nas.mail.alertTo (modules/mail.nix).
 let
   pool = config.nas.pool;
+  mail = config.nas.mail;
 in
 {
   # SMART: alle Platten automatisch, Kurztest taeglich 02:00, Langtest am 1. des Monats 03:00
@@ -13,6 +14,11 @@ in
     autodetect = true;
     defaults.autodetected = "-a -o on -S on -n standby,q -s (S/../.././02|L/../01/./03) -W 4,45,55";
     notifications.wall.enable = true;
+    notifications.mail = {
+      enable = true;
+      sender = mail.from;
+      recipient = mail.alertTo;
+    };
   };
 
   # ZFS Event Daemon: meldet Plattenfehler, Resilver und Scrub-Ergebnisse
@@ -20,12 +26,17 @@ in
     ZED_NOTIFY_VERBOSE = true; # auch erfolgreiche Scrubs melden
     ZED_SCRUB_AFTER_RESILVER = true;
     ZED_USE_ENCLOSURE_LEDS = true;
+    ZED_EMAIL_ADDR = [ mail.alertTo ];
+    ZED_EMAIL_PROG = "${pkgs.msmtp}/bin/msmtp";
+    ZED_EMAIL_OPTS = "@ADDRESS@";
+    ZED_NOTIFY_INTERVAL_SECS = 3600; # gleiche Meldung hoechstens stuendlich
   };
 
   # Taeglicher Gesundheitscheck: schreibt bei Problemen einen Fehler ins Journal
-  # (journalctl -p err -u zfs-health) und an alle Terminals
+  # (journalctl -p err -u zfs-health), an alle Terminals und per Mail
   systemd.services.zfs-health = {
     description = "ZFS: Pool-Zustand und Belegung pruefen";
+    onFailure = [ "notify-mail@%n.service" ];
     serviceConfig.Type = "oneshot";
     path = [ config.boot.zfs.package pkgs.util-linux pkgs.gawk ];
     script = ''

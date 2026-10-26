@@ -10,6 +10,7 @@
       ./modules/links.nix
       ./modules/nvidia.nix
       ./modules/optimizations.nix
+      ./modules/mail.nix
 
       # NAS: ZFS-Pool tank (nur auf der echten Hardware; in der Test-VM auskommentieren)
       ./Hardware/storage.nix
