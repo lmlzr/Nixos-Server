@@ -41,7 +41,7 @@ in
   # (data/config.dat) und Logs. Programmdateien kommen bei jedem Start frisch aus dem Paket,
   # die Konfiguration bleibt erhalten.
   systemd.tmpfiles.rules = [
-    "d ${stateDir} 0750 root root -"
+    "d ${stateDir} 0755 root root -" # Logs lesbar (keine Geheimnisse)
     "d ${stateDir}/iso 0755 root root -"
   ];
 
@@ -61,7 +61,11 @@ in
         cp -rT --no-preserve=mode,ownership ${iventoy}/share/iventoy/$d $d
       done
       mkdir -p log/client log/history
-      ln -sfn ${iventoy}/share/iventoy/lib lib
+      # Programm als echte Datei hierher kopieren: iVentoy leitet sein Arbeitsverzeichnis vom
+      # Ort der Programmdatei ab (ein Verweis in den Nix-Store endete mit Exit 255)
+      rm -rf lib
+      cp -rT --no-preserve=mode,ownership ${iventoy}/share/iventoy/lib lib
+      chmod 755 lib/iventoy
       cp -f ${iventoy}/share/iventoy/version.txt version.txt
     '';
     serviceConfig = {
