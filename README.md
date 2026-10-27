@@ -98,6 +98,10 @@ per PXE direkt aus ISO-Dateien, BIOS und UEFI, Linux und Windows. Ohne USB-Stick
 **Wohin mit den ISOs:** `/mnt/tank/media/ISOs`
 - vom PC: SMB-Freigabe `media` → Ordner `ISOs`
 - per Torrent: in qBittorrent die Kategorie **ISOs** wählen (Speicherort ist dieser Ordner)
+- per Prowlarr (http://neotokyo:9696 → *Search*): Kategorie **PC** wählen, suchen, Download-Symbol.
+  Prowlarr ordnet PC (4000) und PC/ISO (4020) im Download-Client der qBittorrent-Kategorie
+  `ISOs` zu (*Settings → Download Clients → qBittorrent → Mapped Categories*); Filme und Serien
+  von Sonarr/Radarr sind davon nicht betroffen
 - iVentoy liest den Ordner beim Start; neue ISOs: in der Weboberfläche unter *Image Management* aktualisieren
 
 **Einmalig in iVentoy** (http://10.0.0.5:26000):
