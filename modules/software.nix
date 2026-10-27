@@ -12,6 +12,7 @@
     rar
     fzf
     htop
+    nvtopPackages.nvidia # GPU-Last (nvidia-smi stuerzt mit dem 580er-Legacy-Treiber ab)
     bat
     ffmpeg
     libbluray
