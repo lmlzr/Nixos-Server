@@ -153,6 +153,23 @@ bei jedem Start frisch aus dem Nix-Paket. Neue Version: `version`/`sha256` in `s
   ein (USB-)Laufwerk `--device=/dev/sr0` und das passende `/dev/sgN` in `extraOptions` ergänzen.
 - Einstellungen: `/mnt/fast/services/handbrake` bzw. `…/makemkv`.
 
+## Automatic Ripping Machine (vorbereitet, aus)
+
+`containers/arm.nix`, Schalter `nas.arm.enable` (steht auf `false`, das Blu-ray-Laufwerk ist noch
+nicht eingebaut). [ARM](https://github.com/automatic-ripping-machine/automatic-ripping-machine):
+Disc einlegen → Titel über OMDb/TMDb erkennen → mit MakeMKV rippen → mit HandBrake (NVENC)
+umwandeln → als `Titel (Jahr)` ablegen → auswerfen. Weboberfläche: http://neotokyo:8095.
+
+**Wenn das Laufwerk drin ist:**
+1. Prüfen, dass es erkannt wird: `ls /dev/sr*` (meist `/dev/sr0`).
+2. `nas.arm.enable = true;` in `configuration.nix`, Rebuild.
+3. In ARM unter *Settings*: OMDb-API-Schlüssel eintragen (kostenlos, https://www.omdbapi.com/apikey.aspx),
+   HandBrake-Vorlagen auf NVENC stellen (`HB_PRESET_DVD`/`HB_PRESET_BD`, z. B. *H.265 NVENC 1080p*).
+4. Testdisc einlegen.
+
+Ablage: `media/Transcode/ARM/` (`raw`, `transcode`, `completed`), Musik-CDs nach `media/Music`.
+Läuft mit `--privileged` (eigener udev im Container erkennt eingelegte Discs).
+
 ## Lokale KI für Mealie
 
 `services/ai.nix`, Schalter `nas.ai.enable` in `configuration.nix` (eingeschaltet).
