@@ -50,6 +50,33 @@ in
         OLLAMA_CONTEXT_LENGTH = "16384"; # Video-Beschreibung + Transkript passen hinein
       };
     };
+    # Varianten fuer Mealie mit Antwort-Obergrenze und Wiederholungsbremse: ohne Grenze hat sich
+    # das Bildmodell einmal in einer Schleife verfangen und eine Stunde lang weitergeschrieben.
+    # In Mealie sind diese Namen eingetragen (qwen2.5-14b-mealie, qwen2.5vl-mealie).
+    systemd.services.ollama-mealie-models = {
+      description = "Ollama: Modellvarianten fuer Mealie anlegen";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "ollama-model-loader.service" ];
+      wants = [ "ollama-model-loader.service" ];
+      path = [ pkgs.curl ];
+      serviceConfig = {
+        Type = "simple"; # blockiert den Rebuild nicht
+        Restart = "on-failure";
+        RestartSec = 120;
+      };
+      script = let
+        params = ''"parameters":{"num_predict":2048,"repeat_penalty":1.1,"temperature":0.3},"stream":false'';
+      in ''
+        for i in $(seq 1 900); do
+          curl -sf http://127.0.0.1:11434/api/tags | grep -q '"${cfg.textModel}"' \
+            && curl -sf http://127.0.0.1:11434/api/tags | grep -q '"${cfg.visionModel}"' && break
+          sleep 10
+        done
+        curl -sf -X POST http://127.0.0.1:11434/api/create -d '{"model":"qwen2.5-14b-mealie","from":"${cfg.textModel}",${params}}'
+        curl -sf -X POST http://127.0.0.1:11434/api/create -d '{"model":"qwen2.5vl-mealie","from":"${cfg.visionModel}",${params}}'
+      '';
+    };
+
     # Obergrenze, damit ein Modell nie die anderen Dienste verdraengt (Modell + Kontext ~6-9 GB)
     systemd.services.ollama.serviceConfig = {
       MemoryHigh = "12G";

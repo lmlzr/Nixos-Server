@@ -195,11 +195,15 @@ Spracherkennung.
 
 | Name | Base URL | Modell | Timeout (s) | Aufgabe in Mealie |
 |---|---|---|---|---|
-| Ollama Text | `http://10.0.0.5:11434/v1` | `qwen2.5:14b-instruct` | 3600 | allgemein / Rezepte / Zutaten |
-| Ollama Bild | `http://10.0.0.5:11434/v1` | `qwen2.5vl:7b` | 3600 | Bilder |
+| Ollama Text | `http://10.0.0.5:11434/v1` | `qwen2.5-14b-mealie` | 3600 | allgemein / Rezepte / Zutaten |
+| Ollama Bild | `http://10.0.0.5:11434/v1` | `qwen2.5vl-mealie` | 3600 | Bilder |
 | Speaches | `http://10.0.0.5:8001/v1` | `Systran/faster-whisper-small` | 3600 | Audio / Transkription |
 
 3. Bei jedem Anbieter *Test* drücken.
+
+`*-mealie` sind Varianten der Modelle mit höchstens 2048 Token pro Antwort und Wiederholungsbremse
+(Dienst `ollama-mealie-models`). Ohne Grenze hat sich das Bildmodell einmal in einer Schleife
+verfangen und bis zum Timeout weitergeschrieben.
 
 ## Pterodactyl
 
