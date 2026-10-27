@@ -153,9 +153,9 @@ bei jedem Start frisch aus dem Nix-Paket. Neue Version: `version`/`sha256` in `s
   ein (USB-)Laufwerk `--device=/dev/sr0` und das passende `/dev/sgN` in `extraOptions` ergänzen.
 - Einstellungen: `/mnt/fast/services/handbrake` bzw. `…/makemkv`.
 
-## Lokale KI für Mealie (vorbereitet, noch aus)
+## Lokale KI für Mealie
 
-`services/ai.nix`, Schalter `nas.ai.enable` in `configuration.nix` (steht auf `false`).
+`services/ai.nix`, Schalter `nas.ai.enable` in `configuration.nix` (eingeschaltet).
 Mealie (vmdocker, v3.19+) kann damit Rezepte aus Webseiten, Fotos und Videos
 (YouTube/TikTok/Instagram) erstellen und Zutaten zerlegen. Beim Video-Import bekommt die KI
 Titel, **Beschreibung** und gesprochenen Text; vorhandene Untertitel (de/en/fr/es/it) ersetzen die

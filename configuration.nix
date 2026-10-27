@@ -61,8 +61,8 @@
   # Daten-HDDs nach 15 min Leerlauf abschalten (nur echte Hardware)
   nas.spindown.enable = true;
 
-  # Lokale KI fuer Mealie (Ollama + Speaches), siehe services/ai.nix. Vorbereitet, noch aus.
-  nas.ai.enable = false;
+  # Lokale KI fuer Mealie (Ollama + Speaches), siehe services/ai.nix
+  nas.ai.enable = true;
 
   services.pterodactyl = {
     panel.enable = true;
