@@ -21,22 +21,21 @@ let
       url = "https://github.com/ventoy/PXE/releases/download/v${version}/iventoy-${version}-linux-x86_64-free.tar.gz";
       sha256 = "d6c12abc37558e9bb791089bdac6e1cc7ffe402b2b0f4bef6fdc5c3aa51c6a4b";
     };
-    nativeBuildInputs = [ pkgs.patchelf ];
     dontConfigure = true;
     dontBuild = true;
-    dontFixup = true; # mitgelieferte Bibliotheken nicht strippen/umschreiben
-    # Vorgebautes Programm: Lader und Bibliothekspfad auf den Nix-Store zeigen lassen
+    # Unveraendert lassen: iVentoy prueft die Pruefsumme seines Programms und startet sonst
+    # nicht ("checksum not match"). Laeuft ueber nix-ld (Standard-Lader /lib64/ld-linux...).
+    dontFixup = true;
     installPhase = ''
       mkdir -p $out/share/iventoy
       cp -r . $out/share/iventoy/
-      lib=$out/share/iventoy/lib
-      rpath=$lib/lin64:${pkgs.glibc}/lib
-      patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} --set-rpath $rpath $lib/iventoy
-      for so in $lib/lin64/*.so*; do patchelf --set-rpath $rpath $so; done
     '';
   };
 in
 {
+  # Vorgebaute Linux-Programme (iVentoy) ohne Anpassung starten koennen
+  programs.nix-ld.enable = true;
+
   # iVentoy erwartet seine Dateien im Arbeitsverzeichnis und schreibt dort Konfiguration
   # (data/config.dat) und Logs. Programmdateien kommen bei jedem Start frisch aus dem Paket,
   # die Konfiguration bleibt erhalten.
