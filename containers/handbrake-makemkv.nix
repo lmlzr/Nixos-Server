@@ -7,8 +7,8 @@
 #   /mnt/tank/media/Transcode/MakeMKV           Ausgabe von MakeMKV
 #   /mnt/tank/media/Transcode/HandBrake-Watch   was hier landet, kodiert HandBrake automatisch
 #   /mnt/tank/media/Transcode/HandBrake-Output  Ergebnis
-# Die ganze Mediathek liegt unter /storage: HandBrake darf dort schreiben (Ergebnis direkt
-# in Movies/TV speichern), MakeMKV nur lesen (z. B. ISOs zum Rippen).
+# Die ganze Mediathek liegt in beiden schreibbar unter /storage (Ergebnis direkt in Movies/TV
+# speichern, ISOs aus /storage/ISOs rippen).
 # Kein optisches Laufwerk eingebaut: MakeMKV verarbeitet ISO-Dateien/Disc-Ordner. Fuer ein
 # (USB-)Laufwerk spaeter "--device=/dev/sr0" und das passende /dev/sgN durchreichen.
 let
@@ -49,7 +49,7 @@ in
       ports = [ "5801:5800" ];
       volumes = [
         "${cfg.servicesDir}/makemkv:/config:rw"
-        "${cfg.mediaDir}:/storage:ro"
+        "${cfg.mediaDir}:/storage:rw" # schreibbar: direkt nach Movies/TV rippen
         "${transcode}/MakeMKV:/output:rw"
       ];
       environment = common; # MakeMKV-Beta-Schluessel holt das Image selbst
