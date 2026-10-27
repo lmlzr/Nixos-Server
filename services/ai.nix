@@ -80,23 +80,26 @@ in
       '';
     };
 
-    # Speaches laedt Modelle nicht selbst nach: einmalig herunterladen (idempotent)
+    # Speaches laedt Modelle nicht selbst nach: einmalig herunterladen (idempotent).
+    # Type=simple: blockiert den Rebuild nicht, waehrend Docker noch das Image (mehrere GB) laedt.
     systemd.services.speaches-model-download = {
       description = "Speaches: Whisper-Modell ${cfg.whisperModel} herunterladen";
       wantedBy = [ "multi-user.target" ];
       after = [ "docker-speaches.service" ];
       requires = [ "docker-speaches.service" ];
-      path = [ pkgs.curl ];
+      path = [ pkgs.curl pkgs.coreutils ];
       serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
+        Type = "simple";
+        Restart = "on-failure";
+        RestartSec = 60;
       };
       script = ''
-        for i in $(seq 1 60); do
+        for i in $(seq 1 900); do
           curl -sf http://127.0.0.1:8001/health >/dev/null && break
           sleep 2
         done
-        curl -sf -X POST http://127.0.0.1:8001/v1/models/${cfg.whisperModel}
+        curl -sf --max-time 1800 -X POST http://127.0.0.1:8001/v1/models/${cfg.whisperModel}
+        echo "Modell ${cfg.whisperModel} vorhanden"
       '';
     };
 
