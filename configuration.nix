@@ -27,6 +27,7 @@
       ./containers/portainer.nix
       ./containers/lancache-dashboard.nix
       ./containers/handbrake-makemkv.nix
+      ./containers/arm.nix
       #./containers/firefox.nix
 
       ./services/jellyfin.nix
@@ -63,6 +64,9 @@
 
   # Lokale KI fuer Mealie (Ollama + Speaches), siehe services/ai.nix
   nas.ai.enable = true;
+
+  # Automatic Ripping Machine, siehe containers/arm.nix. Vorbereitet, aus: Laufwerk noch nicht eingebaut.
+  nas.arm.enable = false;
 
   services.pterodactyl = {
     panel.enable = true;
