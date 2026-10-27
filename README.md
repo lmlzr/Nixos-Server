@@ -147,8 +147,8 @@ bei jedem Start frisch aus dem Nix-Paket. Neue Version: `version`/`sha256` in `s
   - `Transcode/MakeMKV`: Ausgabe von MakeMKV
   - `Transcode/HandBrake-Watch`: was hier landet, kodiert HandBrake automatisch (Standard-Preset)
   - `Transcode/HandBrake-Output`: Ergebnis
-  - Die ganze Mediathek liegt unter `/storage`: in HandBrake les- und schreibbar (Ergebnis direkt
-    nach `Movies`/`TV`), in MakeMKV nur lesbar (z. B. Blu-ray-ISOs aus `ISOs`).
+  - Die ganze Mediathek liegt in beiden unter `/storage`, les- und schreibbar: Ergebnis direkt
+    nach `Movies`/`TV` speichern, Blu-ray-ISOs aus `ISOs` rippen.
 - **Kein optisches Laufwerk eingebaut:** MakeMKV verarbeitet ISO-Dateien und Disc-Ordner. Für
   ein (USB-)Laufwerk `--device=/dev/sr0` und das passende `/dev/sgN` in `extraOptions` ergänzen.
 - Einstellungen: `/mnt/fast/services/handbrake` bzw. `…/makemkv`.
