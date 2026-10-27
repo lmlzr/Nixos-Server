@@ -180,7 +180,7 @@ Spracherkennung.
 
 | Dienst | Adresse | Modell |
 |---|---|---|
-| Ollama (Text + Bild) | `http://10.0.0.5:11434/v1` | `qwen2.5:7b-instruct`, `qwen2.5vl:7b` (~10 GB, `/var/lib/ollama`) |
+| Ollama (Text + Bild) | `http://10.0.0.5:11434/v1` | `qwen2.5:14b-instruct`, `qwen2.5vl:7b` (~15 GB, `/var/lib/ollama`) |
 | Speaches (Spracherkennung) | `http://10.0.0.5:8001/v1` | `Systran/faster-whisper-small` (`/mnt/fast/services/speaches`) |
 
 - Läuft auf der CPU (Quadro P400 zu klein): Text ca. 1–3 min, Foto mehrere Minuten.
@@ -195,9 +195,9 @@ Spracherkennung.
 
 | Name | Base URL | Modell | Timeout (s) | Aufgabe in Mealie |
 |---|---|---|---|---|
-| Ollama Text | `http://10.0.0.5:11434/v1` | `qwen2.5:7b-instruct` | 600 | allgemein / Rezepte / Zutaten |
-| Ollama Bild | `http://10.0.0.5:11434/v1` | `qwen2.5vl:7b` | 900 | Bilder |
-| Speaches | `http://10.0.0.5:8001/v1` | `Systran/faster-whisper-small` | 900 | Audio / Transkription |
+| Ollama Text | `http://10.0.0.5:11434/v1` | `qwen2.5:14b-instruct` | 3600 | allgemein / Rezepte / Zutaten |
+| Ollama Bild | `http://10.0.0.5:11434/v1` | `qwen2.5vl:7b` | 3600 | Bilder |
+| Speaches | `http://10.0.0.5:8001/v1` | `Systran/faster-whisper-small` | 3600 | Audio / Transkription |
 
 3. Bei jedem Anbieter *Test* drücken.
 
