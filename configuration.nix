@@ -44,7 +44,6 @@
 
       ./services/steam-lancache-prefill.nix
       ./services/iventoy.nix
-      ./services/ai.nix
       ./services/arr-stack/default.nix
       ./services/seerr.nix
       ./services/pterodactyl
@@ -61,9 +60,6 @@
 
   # Daten-HDDs nach 15 min Leerlauf abschalten (nur echte Hardware)
   nas.spindown.enable = true;
-
-  # Lokale KI fuer Mealie (Ollama + Speaches), siehe services/ai.nix
-  nas.ai.enable = true;
 
   # Automatic Ripping Machine, siehe containers/arm.nix. Vorbereitet, aus: Laufwerk noch nicht eingebaut.
   nas.arm.enable = false;

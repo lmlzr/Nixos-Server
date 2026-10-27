@@ -170,41 +170,6 @@ umwandeln → als `Titel (Jahr)` ablegen → auswerfen. Weboberfläche: http://n
 Ablage: `media/Transcode/ARM/` (`raw`, `transcode`, `completed`), Musik-CDs nach `media/Music`.
 Läuft mit `--privileged` (eigener udev im Container erkennt eingelegte Discs).
 
-## Lokale KI für Mealie
-
-`services/ai.nix`, Schalter `nas.ai.enable` in `configuration.nix` (eingeschaltet).
-Mealie (vmdocker, v3.19+) kann damit Rezepte aus Webseiten, Fotos und Videos
-(YouTube/TikTok/Instagram) erstellen und Zutaten zerlegen. Beim Video-Import bekommt die KI
-Titel, **Beschreibung** und gesprochenen Text; vorhandene Untertitel (de/en/fr/es/it) ersetzen die
-Spracherkennung.
-
-| Dienst | Adresse | Modell |
-|---|---|---|
-| Ollama (Text + Bild) | `http://10.0.0.5:11434/v1` | `qwen2.5:14b-instruct`, `qwen2.5vl:7b` (~15 GB, `/var/lib/ollama`) |
-| Speaches (Spracherkennung) | `http://10.0.0.5:8001/v1` | `Systran/faster-whisper-small` (`/mnt/fast/services/speaches`) |
-
-- Läuft auf der CPU (Quadro P400 zu klein): Text ca. 1–3 min, Foto mehrere Minuten.
-- Modelle werden erst bei Bedarf geladen und nach 5 min Leerlauf entladen; Ollama max. 14 GB RAM.
-- Ohne Anmeldung, nur über die LAN-Schnittstelle erreichbar.
-
-**Einschalten:**
-1. `nas.ai.enable = true;` in `configuration.nix`, dann Rebuild. Der erste Start lädt ~10 GB
-   Modelle (`systemctl status ollama-model-loader speaches-model-download`).
-2. Mealie → *Einstellungen → KI-Anbieter* (bzw. *AI Providers*) drei Anbieter anlegen,
-   API-Schlüssel jeweils beliebig (z. B. `ollama`), Ollama/Speaches ignorieren ihn:
-
-| Name | Base URL | Modell | Timeout (s) | Aufgabe in Mealie |
-|---|---|---|---|---|
-| Ollama Text | `http://10.0.0.5:11434/v1` | `qwen2.5-14b-mealie` | 3600 | allgemein / Rezepte / Zutaten |
-| Ollama Bild | `http://10.0.0.5:11434/v1` | `qwen2.5vl-mealie` | 3600 | Bilder |
-| Speaches | `http://10.0.0.5:8001/v1` | `Systran/faster-whisper-small` | 3600 | Audio / Transkription |
-
-3. Bei jedem Anbieter *Test* drücken.
-
-`*-mealie` sind Varianten der Modelle mit höchstens 2048 Token pro Antwort und Wiederholungsbremse
-(Dienst `ollama-mealie-models`). Ohne Grenze hat sich das Bildmodell einmal in einer Schleife
-verfangen und bis zum Timeout weitergeschrieben.
-
 ## Pterodactyl
 
 Panel v1.15.2 und Wings v1.13.4, als eigenes Modul in `services/pterodactyl/`
