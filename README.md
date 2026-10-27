@@ -24,6 +24,9 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Pterodactyl Panel | http://10.0.0.5:8090 | LAN | über die IP öffnen (`APP_URL`) |
 | Portainer | https://neotokyo:9443 | LAN | Docker-Verwaltung; Port 8000 nur für Edge-Agents |
 | Lancache-Dashboard | http://neotokyo:3000 | LAN | Downloads, HIT/MISS, Clients, gecachte Spiele; siehe „Lancache“ |
+| iVentoy | http://10.0.0.5:26000 | LAN | Netzwerk-Boot von ISOs, ohne Anmeldung; siehe „Netzwerk-Boot (iVentoy)“ |
+| HandBrake | http://neotokyo:5800 | LAN | Video umwandeln mit NVENC; siehe „HandBrake und MakeMKV“ |
+| MakeMKV | http://neotokyo:5801 | LAN | Discs/ISOs nach MKV |
 
 ### Sonstige Ports
 
@@ -42,6 +45,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Redis (Pterodactyl) | Socket | lokal | nur Unix-Socket |
 | Lancache Metrics | 8080/tcp | lokal | nginx auf `localhost`; aus dem LAN geht 8080 an qBittorrent |
 | FlareSolverr | 8191/tcp | lokal | Cloudflare-Umgehung für Prowlarr (`services/arr-stack/flaresolverr.nix`) |
+| iVentoy PXE | 69/udp (TFTP), 16000/tcp (HTTP), 10809/tcp (NBD) | LAN | nur LAN-Schnittstelle; 67/udp (DHCP) bewusst zu |
 
 Laufen inzwischen auf einem anderen Host (hier auskommentiert): Home Assistant, Karakeep,
 Mealie, Syncthing, Mosquitto, Firefox.
@@ -85,6 +89,64 @@ Backup einspielen (Dienst vorher stoppen, Datei muss für `jellyfin` lesbar sein
 - **Dashboard** (`containers/lancache-dashboard.nix`, [imahmud1/lancache-dashboard](https://github.com/imahmud1/lancache-dashboard)):
   liest `/var/log/nginx/lancache/access.log` (Container mit Gruppe `nginx`), Datenbank unter
   `/mnt/tank/services/lancache-dashboard`. Prefill-Traffic (`10.0.0.5`) ist aus der Client-Statistik ausgeblendet.
+
+## Netzwerk-Boot (iVentoy)
+
+`services/iventoy.nix`: [iVentoy](https://www.iventoy.com) (Free Edition) bootet Rechner im LAN
+per PXE direkt aus ISO-Dateien, BIOS und UEFI, Linux und Windows. Ohne USB-Stick.
+
+**Wohin mit den ISOs:** `/mnt/tank/media/ISOs`
+- vom PC: SMB-Freigabe `media` → Ordner `ISOs`
+- per Torrent: in qBittorrent die Kategorie **ISOs** wählen (Speicherort ist dieser Ordner)
+- iVentoy liest den Ordner beim Start; neue ISOs: in der Weboberfläche unter *Image Management* aktualisieren
+
+**Einmalig in iVentoy** (http://10.0.0.5:26000):
+1. *Configuration* → **DHCP Server Mode: `External`** (DHCP macht weiter der Router).
+2. *Boot Information* → **Server IP: `10.0.0.5`** (nicht die Docker-/VPN-Adressen des Servers).
+3. Grünen Start-Knopf drücken. Ab dann startet der Dienst nach jedem Neustart automatisch
+   (`IVENTOY_AUTO_RUN`, greift erst, wenn `data/config.dat` gespeichert ist).
+
+Nie `Internal` wählen: dann wäre iVentoy ein zweiter DHCP-Server im LAN. Damit das selbst aus
+Versehen nichts anrichtet, ist UDP 67 in der Firewall zu.
+
+**Im Router (OPNsense `10.0.0.1`), DHCP für das LAN → Netzwerk-Boot:**
+
+| Einstellung | Wert |
+|---|---|
+| Next-Server (Option 66) | `10.0.0.5` |
+| Bootdatei (Option 67), automatisch | `iventoy_loader_16000` |
+| falls getrennt einstellbar: BIOS | `iventoy_loader_16000_bios` |
+| falls getrennt einstellbar: UEFI 64 bit | `iventoy_loader_16000_uefi` |
+
+Die genauen Namen zeigt iVentoy im Modus `External` selbst an; die Tabelle gilt für den
+Standard-HTTP-Port 16000. Mit dnsmasq als DHCP: `dhcp-boot=iventoy_loader_16000,,10.0.0.5`.
+
+**Booten:** Am Zielrechner im BIOS/UEFI **Netzwerk-Boot (PXE, „Network Stack“ aktivieren)** wählen,
+bei UEFI ggf. Secure Boot aus. Es erscheint das iVentoy-Menü mit allen ISOs.
+
+Daten: `/var/lib/iventoy` (Konfiguration `data/config.dat`, Logs `log/`); Programmdateien kommen
+bei jedem Start frisch aus dem Nix-Paket. Neue Version: `version`/`sha256` in `services/iventoy.nix`
+(Prüfsummen: `sha256.txt` im [GitHub-Release](https://github.com/ventoy/PXE/releases)).
+
+## HandBrake und MakeMKV
+
+`containers/handbrake-makemkv.nix`, beide mit Oberfläche im Browser (noVNC):
+
+| | Adresse | Image |
+|---|---|---|
+| HandBrake | http://neotokyo:5800 | `zocker160/handbrake-nvenc` (jlesage-Basis; `jlesage/handbrake` selbst kann kein NVENC) |
+| MakeMKV | http://neotokyo:5801 | `jlesage/makemkv` (Beta-Schlüssel holt das Image selbst) |
+
+- **NVENC:** GPU per CDI (`hardware.nvidia-container-toolkit`, `--device=nvidia.com/gpu=all`).
+  In HandBrake als Video-Encoder *H.264 (NVEnc)* oder *H.265 (NVEnc)* wählen.
+- **Ordner** (SMB-Freigabe `media` → `Transcode`):
+  - `Transcode/MakeMKV`: Ausgabe von MakeMKV
+  - `Transcode/HandBrake-Watch`: was hier landet, kodiert HandBrake automatisch (Standard-Preset)
+  - `Transcode/HandBrake-Output`: Ergebnis
+  - Die ganze Mediathek ist in beiden unter `/storage` lesbar (z. B. Blu-ray-ISOs aus `ISOs`).
+- **Kein optisches Laufwerk eingebaut:** MakeMKV verarbeitet ISO-Dateien und Disc-Ordner. Für
+  ein (USB-)Laufwerk `--device=/dev/sr0` und das passende `/dev/sgN` in `extraOptions` ergänzen.
+- Einstellungen: `/mnt/fast/services/handbrake` bzw. `…/makemkv`.
 
 ## Pterodactyl
 
