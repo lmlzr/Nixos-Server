@@ -21,7 +21,7 @@ in
 
     textModel = lib.mkOption {
       type = lib.types.str;
-      default = "qwen2.5:7b-instruct";
+      default = "qwen2.5:14b-instruct"; # im Vergleich besser als 7B und gemma3:12b
       description = "Ollama-Modell fuer Text (Rezept aus Webseite/Video-Text, Zutaten zerlegen).";
     };
     visionModel = lib.mkOption {
