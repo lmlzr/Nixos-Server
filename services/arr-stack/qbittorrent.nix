@@ -37,6 +37,14 @@ in
     openFirewall = false;
   };
 
+  # Unfertige Torrents auf der NVMe (qBittorrent: "Unvollstaendige Torrents speichern in"),
+  # erst der fertige Download wird nach tank/media verschoben. Sonst schreibt jeder laufende
+  # Download staendig auf die HDDs und sie gehen nie in den Spindown.
+  systemd.tmpfiles.rules = [
+    "d ${config.nas.servicesDir}/qbittorrent/incomplete 2775 qbittorrent media -"
+  ];
+  systemd.services.qbittorrent.unitConfig.RequiresMountsFor = [ config.nas.servicesDir ];
+
   # Web-UI im LAN erreichbar (wird per portMapping in den Namespace weitergeleitet).
   # Sonarr/Radarr/Lidarr erreichen qBittorrent unter 192.168.15.1:8080
   networking.firewall.allowedTCPPorts = [ webuiPort ];
