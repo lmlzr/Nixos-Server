@@ -7,7 +7,8 @@
 #      (Host, Port 563, SSL an, Benutzer, Passwort, Verbindungen laut Tarif).
 #   2. Einen oder mehrere Indexer (Suche): in Prowlarr unter Indexers hinzufuegen, Prowlarr gibt
 #      sie an Sonarr/Radarr/Lidarr/Bookshelf weiter.
-# Kein VPN noetig: Die Verbindung zum Provider ist per SSL verschluesselt, es wird nichts hochgeladen.
+# Laeuft wie qBittorrent im VPN-Namespace "proton" (siehe qbittorrent.nix): faellt das VPN weg,
+# hat SABnzbd kein Netz. Die Weboberflaeche wird per portMapping auf 10.0.0.5:8085 durchgereicht.
 #
 # Einstellungen aus der Weboberflaeche bleiben erhalten (allowConfigWrite). Was hier in settings
 # steht, wird bei jedem Start erzwungen.
@@ -77,6 +78,14 @@ in
     };
   };
 
+  vpnNamespaces.proton.portMappings = [
+    { from = port; to = port; }
+  ];
+  systemd.services.sabnzbd.vpnConfinement = {
+    enable = true;
+    vpnNamespace = "proton";
+  };
+
   systemd.services.sabnzbd = {
     requires = [ "sabnzbd-keys.service" ];
     after = [ "sabnzbd-keys.service" ];
@@ -89,5 +98,6 @@ in
     "d ${complete} 2775 sabnzbd media -"
   ];
 
-  networking.firewall.interfaces.${cfg.lanInterface}.allowedTCPPorts = [ port ];
+  # Wie bei qBittorrent global offen: auch Bookshelf (Docker-Bridge) erreicht SABnzbd ueber 10.0.0.5
+  networking.firewall.allowedTCPPorts = [ port ];
 }

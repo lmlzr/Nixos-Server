@@ -202,7 +202,7 @@ außer Haus.
 
 `services/arr-stack/sabnzbd.nix`: Usenet-Downloader, http://neotokyo:8085. Unfertiges liegt auf der
 NVMe (`/mnt/fast/services/sabnzbd/incomplete`), Fertiges in `media/downloads/usenet/<kategorie>`
-(Kategorien `tv`, `movies`, `music`, `books`). Kein VPN nötig (SSL zum Provider, kein Upload).
+(Kategorien `tv`, `movies`, `music`, `books`). Läuft wie qBittorrent nur über ProtonVPN.
 
 1. Usenet-Provider buchen und in SABnzbd unter *Config → Servers* eintragen (Port 563, SSL an).
 2. Usenet-Indexer in Prowlarr unter *Indexers* hinzufügen, Prowlarr verteilt sie an die arr-Apps.
