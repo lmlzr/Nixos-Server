@@ -27,6 +27,8 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | iVentoy | http://10.0.0.5:26000 | LAN | Netzwerk-Boot von ISOs, ohne Anmeldung; siehe „Netzwerk-Boot (iVentoy)“ |
 | HandBrake | http://neotokyo:5800 | LAN | Video umwandeln mit NVENC; siehe „HandBrake und MakeMKV“ |
 | MakeMKV | http://neotokyo:5801 | LAN | Discs/ISOs nach MKV |
+| Bookshelf | http://neotokyo:8787 | LAN | Bücher/Hörbücher (Readarr-Nachfolger), siehe „Bookshelf“ |
+| Immich | http://neotokyo:2283 | LAN | Fotos/Videos vom Handy, siehe „Immich“ |
 
 ### Sonstige Ports
 
@@ -169,6 +171,41 @@ umwandeln → als `Titel (Jahr)` ablegen → auswerfen. Weboberfläche: http://n
 
 Ablage: `media/Transcode/ARM/` (`raw`, `transcode`, `completed`), Musik-CDs nach `media/Music`.
 Läuft mit `--privileged` (eigener udev im Container erkennt eingelegte Discs).
+
+## Bookshelf
+
+`containers/bookshelf.nix`: [Bookshelf](https://github.com/pennydreadful/bookshelf), Weiterentwicklung
+des eingestellten Readarr (dessen Buchdaten-Quelle ist abgeschaltet). Variante `hardcover`:
+Buchdaten von hardcover.app. Ordner: `media/Books`, `media/Audiobooks`. Die Mediathek liegt im
+Container unter demselben Pfad wie auf dem Host, deshalb findet Bookshelf die qBittorrent-Downloads
+ohne Pfad-Zuordnung. In Prowlarr als App vom Typ *Readarr* eingetragen.
+
+## Immich
+
+`services/immich.nix`: Foto-/Video-Sicherung vom Handy, http://neotokyo:2283 (erster Aufruf legt
+das Admin-Konto an; Handy-App „Immich“).
+- Originale: Dataset `tank/immich` (sanoid: 30 Tage täglich, 12 Monate monatlich)
+- Vorschaubilder: `/mnt/fast/services/immich-thumbs`, per Bind-Mount nach `…/immich/thumbs`,
+  damit Durchblättern die HDDs nicht weckt
+- Datenbank: PostgreSQL (`/var/lib/postgresql`), Gesichter/Suche auf der CPU
+
+Einmalig vor dem ersten Rebuild:
+```bash
+sudo zfs create -o mountpoint=legacy -o recordsize=1M tank/immich
+sudo mkdir -p /mnt/fast/services/immich-thumbs
+```
+
+**Achtung:** Der Mirror schützt nur vor dem Ausfall einer Platte. Für Fotos fehlt noch ein Backup
+außer Haus.
+
+## Updates der Container auf vmdocker
+
+Nach dem nächtlichen Backup (04:00, `/usr/local/sbin/docker-backup.sh` auf vmdocker, nur wenn das
+Backup geklappt hat) läuft einmal [Watchtower](https://github.com/nicholas-fedor/watchtower)
+(gepflegter Fork, das Original ist archiviert): aktualisiert alle Container, deren Image-Tag ein
+neueres Image hat, und löscht alte Images. Meldung per ntfy an https://push.lmlzr.com/updates.
+Feste Versionen (Checkmk 2.5.0p7, Mealie v3.29.0, Meilisearch v1.41.0, Omada 6.2) bleiben, bis
+man sie in der Compose-Datei hochsetzt.
 
 ## Pterodactyl
 

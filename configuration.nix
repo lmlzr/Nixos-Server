@@ -29,6 +29,7 @@
       ./containers/lancache-dashboard.nix
       ./containers/handbrake-makemkv.nix
       ./containers/arm.nix
+      ./containers/bookshelf.nix
       #./containers/firefox.nix
 
       ./services/jellyfin.nix
@@ -45,6 +46,7 @@
 
       ./services/steam-lancache-prefill.nix
       ./services/iventoy.nix
+      ./services/immich.nix
       ./services/arr-stack/default.nix
       ./services/seerr.nix
       ./services/pterodactyl
