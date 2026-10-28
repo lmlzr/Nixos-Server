@@ -198,6 +198,17 @@ sudo mkdir -p /mnt/fast/services/immich-thumbs
 **Achtung:** Der Mirror schützt nur vor dem Ausfall einer Platte. Für Fotos fehlt noch ein Backup
 außer Haus.
 
+## Usenet (SABnzbd)
+
+`services/arr-stack/sabnzbd.nix`: Usenet-Downloader, http://neotokyo:8085. Unfertiges liegt auf der
+NVMe (`/mnt/fast/services/sabnzbd/incomplete`), Fertiges in `media/downloads/usenet/<kategorie>`
+(Kategorien `tv`, `movies`, `music`, `books`). Kein VPN nötig (SSL zum Provider, kein Upload).
+
+1. Usenet-Provider buchen und in SABnzbd unter *Config → Servers* eintragen (Port 563, SSL an).
+2. Usenet-Indexer in Prowlarr unter *Indexers* hinzufügen, Prowlarr verteilt sie an die arr-Apps.
+3. In Sonarr/Radarr/Lidarr/Bookshelf ist SABnzbd als Download-Client eingetragen (Host
+   `10.0.0.5`, Port `8085`, API-Key aus `/etc/secrets/sabnzbd-keys.ini`).
+
 ## LiteLLM
 
 `containers/litellm.nix`: ein OpenAI-kompatibler Endpunkt für viele KI-Anbieter, UI unter
