@@ -198,6 +198,22 @@ sudo mkdir -p /mnt/fast/services/immich-thumbs
 **Achtung:** Der Mirror schützt nur vor dem Ausfall einer Platte. Für Fotos fehlt noch ein Backup
 außer Haus.
 
+## LiteLLM
+
+`containers/litellm.nix`: ein OpenAI-kompatibler Endpunkt für viele KI-Anbieter, UI unter
+http://neotokyo:4000/ui. Datenbank (PostgreSQL-Container auf Port 5433, nur lokal) in
+`/mnt/fast/services/litellm/db`.
+
+- Login und Master-Key: `sudo cat /etc/secrets/litellm.env` (wird beim ersten Start erzeugt).
+  `LITELLM_SALT_KEY` nie ändern, damit sind die gespeicherten Anbieter-Keys verschlüsselt.
+- Anbieter-Key eintragen, entweder in der UI unter *Models → Add Model*, oder in
+  `/etc/secrets/litellm.env` die Zeile (z. B. `#OPENAI_API_KEY=`) einkommentieren und
+  `sudo systemctl restart docker-litellm`. Dann ist jedes Modell des Anbieters als
+  `<anbieter>/<modell>` nutzbar (`openai/…`, `anthropic/…`, `gemini/…`, `mistral/…`, `groq/…`,
+  `deepseek/…`, `xai/…`, `openrouter/…`, `together_ai/…`, `perplexity/…`, `cohere/…`).
+- Anwendungen: Base-URL `http://10.0.0.5:4000/v1`, als API-Key einen in der UI erzeugten
+  *Virtual Key* (pro Anwendung einer, mit optionalem Budget).
+
 ## Updates der Container auf vmdocker
 
 Nach dem nächtlichen Backup (04:00, `/usr/local/sbin/docker-backup.sh` auf vmdocker, nur wenn das

@@ -30,6 +30,7 @@
       ./containers/handbrake-makemkv.nix
       ./containers/arm.nix
       ./containers/bookshelf.nix
+      ./containers/litellm.nix
       #./containers/firefox.nix
 
       ./services/jellyfin.nix
