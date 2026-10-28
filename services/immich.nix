@@ -47,7 +47,12 @@ in
     "d ${media} 0750 immich immich -"
     "d ${thumbs} 0750 immich immich -"
   ];
-  systemd.services.immich-server.unitConfig.RequiresMountsFor = [ media "${media}/thumbs" ];
+  systemd.services.immich-server = {
+    unitConfig.RequiresMountsFor = [ media "${media}/thumbs" ];
+    # tmpfiles laeuft vor dem Einhaengen des Datasets; der eingehaengte Ordner gehoert sonst root
+    # und Immich bricht mit EACCES ab. "+" = als root vor dem Start.
+    serviceConfig.ExecStartPre = [ "+${pkgs.coreutils}/bin/install -d -m 0750 -o immich -g immich ${media}" ];
+  };
 
   services.sanoid.datasets.${dataset} = {
     hourly = 0;
