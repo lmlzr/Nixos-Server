@@ -31,6 +31,7 @@
       ./containers/arm.nix
       ./containers/bookshelf.nix
       ./containers/litellm.nix
+      ./containers/ersatztv.nix
       #./containers/firefox.nix
 
       ./services/jellyfin.nix
