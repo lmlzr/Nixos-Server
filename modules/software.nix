@@ -14,6 +14,7 @@
     htop
     nvtopPackages.nvidia # GPU-Last (nvidia-smi stuerzt mit dem 580er-Legacy-Treiber ab)
     bat
+    yazi # Dateimanager im Terminal mit Vorschau (Start: yazi), bringt fd/rg/file/jq/poppler mit
     ffmpeg
     libbluray
     kitty.terminfo
