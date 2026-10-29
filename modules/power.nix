@@ -10,7 +10,7 @@
     "w /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference - - - - balance_power"
   ];
 
-  # SATA-Link-Stromsparen fuer alle Controller (Boot-SSD, L2ARC-SSD, HDDs).
+  # SATA-Link-Stromsparen fuer alle Controller (Boot-SSD, HDDs).
   # Kontrolle: cat /sys/class/scsi_host/host*/link_power_management_policy
   # Ausnahme: Boot-SSD Crucial BX500 bleibt max_performance (Kernel-Quirk nolpm, Firmware-Bug);
   # DUMMY-Ports ohne Anschluss melden "Operation not supported" - beides ist normal.
