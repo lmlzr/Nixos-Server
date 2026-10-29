@@ -51,4 +51,46 @@ in
   # Web-UI im LAN erreichbar (wird per portMapping in den Namespace weitergeleitet).
   # Sonarr/Radarr/Lidarr erreichen qBittorrent unter 192.168.15.1:8080
   networking.firewall.allowedTCPPorts = [ webuiPort ];
+
+  # ProtonVPN-Port-Forwarding (NAT-PMP): ohne weitergeleiteten Port kann kein Peer
+  # qBittorrent erreichen, seltene Torrents bleiben dann "stalled". Proton vergibt den Port
+  # nur, solange er alle < 60 s erneuert wird, und er kann wechseln; deshalb laeuft das hier
+  # dauerhaft im VPN-Namespace und traegt den Port in qBittorrent ein.
+  # Voraussetzungen: WireGuard-Config fuer einen P2P-Server mit "NAT-PMP" erzeugt, und in
+  # qBittorrent (Optionen -> WebUI) "Authentifizierung fuer Clients auf localhost umgehen" an.
+  # Kontrolle: journalctl -u proton-portforward
+  systemd.services.proton-portforward = {
+    description = "ProtonVPN Port-Forwarding fuer qBittorrent";
+    after = [ "qbittorrent.service" ];
+    wants = [ "qbittorrent.service" ];
+    wantedBy = [ "multi-user.target" ];
+    vpnConfinement = {
+      enable = true;
+      vpnNamespace = "proton";
+    };
+    path = [ pkgs.libnatpmp pkgs.curl pkgs.gnused ];
+    script = ''
+      gw=10.2.0.1
+      api=http://127.0.0.1:${toString webuiPort}/api/v2/app
+      current=
+      while true; do
+        out=$(natpmpc -a 1 0 udp 60 -g $gw && natpmpc -a 1 0 tcp 60 -g $gw) || {
+          echo "NAT-PMP-Anfrage fehlgeschlagen (P2P-Server mit NAT-PMP?)"; sleep 15; continue; }
+        port=$(echo "$out" | sed -n 's/.*Mapped public port \([0-9]*\) protocol TCP.*/\1/p')
+        if [ -n "$port" ] && [ "$port" != "$current" ]; then
+          if curl -sf --data "json={\"listen_port\":$port,\"random_port\":false,\"upnp\":false}" \
+               "$api/setPreferences"; then
+            echo "qBittorrent lauscht jetzt auf Port $port"; current=$port
+          else
+            echo "Port $port konnte nicht gesetzt werden (localhost-Bypass in qBittorrent an?)"
+          fi
+        fi
+        sleep 45
+      done
+    '';
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = "10s";
+    };
+  };
 }
