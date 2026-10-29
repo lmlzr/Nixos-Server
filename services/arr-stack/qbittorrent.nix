@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   webuiPort = 8080;
@@ -44,6 +44,9 @@ in
     "d ${config.nas.servicesDir}/qbittorrent/incomplete 2775 qbittorrent media -"
   ];
   systemd.services.qbittorrent.unitConfig.RequiresMountsFor = [ config.nas.servicesDir ];
+  # Dateien gruppen-beschreibbar (media) anlegen: Sonarr/Radarr duerfen sonst wegen
+  # fs.protected_hardlinks keinen Hardlink setzen und kopieren still (doppelter Platz).
+  systemd.services.qbittorrent.serviceConfig.UMask = lib.mkForce "0002";
 
   # Web-UI im LAN erreichbar (wird per portMapping in den Namespace weitergeleitet).
   # Sonarr/Radarr/Lidarr erreichen qBittorrent unter 192.168.15.1:8080
