@@ -73,6 +73,7 @@ in
       gw=10.2.0.1
       api=http://127.0.0.1:${toString webuiPort}/api/v2/app
       current=
+      tries=0
       while true; do
         out=$(natpmpc -a 1 0 udp 60 -g $gw && natpmpc -a 1 0 tcp 60 -g $gw) || {
           echo "NAT-PMP-Anfrage fehlgeschlagen (P2P-Server mit NAT-PMP?)"; sleep 15; continue; }
@@ -81,8 +82,12 @@ in
           if curl -sf --data "json={\"listen_port\":$port,\"random_port\":false,\"upnp\":false}" \
                "$api/setPreferences"; then
             echo "qBittorrent lauscht jetzt auf Port $port"; current=$port
-          else
+          elif [ $((tries += 1)) -ge 6 ]; then
+            # direkt nach einem qBittorrent-Start ist die Web-UI noch nicht bereit
             echo "Port $port konnte nicht gesetzt werden (localhost-Bypass in qBittorrent an?)"
+            tries=0
+          else
+            sleep 5; continue
           fi
         fi
         sleep 45
