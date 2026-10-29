@@ -3,10 +3,8 @@
 # ZFS-Pool "tank": Mirror aus 2x 16 TB (wwn-0x5000c500e7ab0441, wwn-0x5000c500e7aafd88).
 # ZFS-Pool "fast": WD Blue SN580 1 TB (NVMe, einzeln) nur fuer die Dienst-Daten,
 # naechtlich per syncoid nach tank/backup/services gesichert.
-# L2ARC von tank: Intenso 256 GB (ata-INTENSO_5680079419EE00164834), secondarycache=metadata
-# auf tank (vererbt). Haelt Verzeichnisse/Datei-Infos, auch ueber Neustarts (persistent L2ARC),
-# damit z. B. der nginx-Cache-Loader des Lancache die HDDs nicht weckt. Ausfall = nur Cache weg.
-# Eingerichtet per: zpool add tank cache <ssd>; zfs set secondarycache=metadata tank
+# Kein L2ARC mehr: Intenso-SSD am 2026-10-29 aus tank entfernt, ihr SATA-Port ist fuer das
+# Blu-ray-Laufwerk vorgesehen.
 # Ersetzt Hardware/hdds.nix. Pools und Datasets werden NICHT automatisch angelegt,
 # siehe docs/NAS-Migration.md und docs/SSD-SERVICES.md.
 let

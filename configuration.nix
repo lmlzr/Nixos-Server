@@ -70,6 +70,10 @@
 
   services.pterodactyl = {
     panel.enable = true;
+    # Aufruf ueber Cloudflare-Tunnel (Container jolly_turing auf vmdocker 10.0.0.3).
+    # Wings: wings.lmlzr.com per nginx auf dem VPS, siehe vps/nginx-wings.conf
+    panel.appUrl = "https://hosting.lmlzr.com";
+    panel.trustedProxies = [ "10.0.0.3" ];
     # Mails (Passwort-Reset, Einladungen) ueber Proton; Token: TOKEN_PTERODACTYL
     panel.settings = {
       MAIL_MAILER = "smtp";

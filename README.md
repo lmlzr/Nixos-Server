@@ -5,8 +5,10 @@ Nixos Server config for switching von proxmox to nix
 
 Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 **Erreichbar:** *LAN* = aus dem Heimnetz, *lokal* = nur auf dem Server selbst.
-Öffentlich ist nur Jellyfin unter https://jellyfin.lmlzr.com (nginx auf dem VPS, per WireGuard
-`10.10.0.1` → `10.0.0.5:8096`; `10.10.0.1` steht in Jellyfin als bekannter Proxy).
+Öffentlich sind Jellyfin unter https://jellyfin.lmlzr.com (nginx auf dem VPS, per WireGuard
+`10.10.0.1` → `10.0.0.5:8096`; `10.10.0.1` steht in Jellyfin als bekannter Proxy) sowie Pterodactyl:
+Panel https://hosting.lmlzr.com (Cloudflare-Tunnel) und Wings https://wings.lmlzr.com (nginx auf
+dem VPS), siehe „Pterodactyl“.
 
 ### Weboberflächen
 
@@ -21,7 +23,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Prowlarr | http://neotokyo:9696 | LAN | |
 | Seerr | http://neotokyo:5055 | LAN | Film-/Serienwünsche (früher Jellyseerr); Einrichtung siehe unten |
 | qBittorrent | http://neotokyo:8080 | LAN | läuft im VPN-Namespace; vom Server selbst: `192.168.15.1:8080` |
-| Pterodactyl Panel | http://10.0.0.5:8090 | LAN | über die IP öffnen (`APP_URL`) |
+| Pterodactyl Panel | https://hosting.lmlzr.com | öffentlich | Cloudflare-Tunnel (vmdocker) → `10.0.0.5:8090`; nur über diese Adresse verbindet die Konsole (`APP_URL`) |
 | Portainer | https://neotokyo:9443 | LAN | Docker-Verwaltung; Port 8000 nur für Edge-Agents |
 | Lancache-Dashboard | http://neotokyo:3000 | LAN | Downloads, HIT/MISS, Clients, gecachte Spiele; siehe „Lancache“ |
 | iVentoy | http://10.0.0.5:26000 | LAN | Netzwerk-Boot von ISOs, ohne Anmeldung; siehe „Netzwerk-Boot (iVentoy)“ |
@@ -40,7 +42,7 @@ Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
 | Windows-Netzwerkerkennung (wsdd) | 5357/tcp, 3702/udp | LAN | Server erscheint unter „Netzwerk“ |
 | Checkmk-Agent | 6556/tcp | LAN | nur LAN-Schnittstelle, nur vom Checkmk-Server `10.0.0.3` |
 | Jellyfin (Discovery) | 1900/udp, 7359/udp | LAN | Clients finden den Server im LAN |
-| Pterodactyl Wings API | 8443/tcp | LAN | Browser-Konsole und Panel sprechen Wings hierüber an |
+| Pterodactyl Wings API | 8443/tcp | LAN | von außen als https://wings.lmlzr.com (nginx auf dem VPS); Browser-Konsole und Panel gehen darüber |
 | Pterodactyl SFTP | 2022/tcp | LAN | Dateizugriff auf Gameserver, Login mit Panel-Benutzer |
 | Gameserver | 25565–25600/tcp+udp | LAN | im Panel als Allocations anlegen |
 | MariaDB | Socket | lokal | nur Unix-Socket, für das Panel |
@@ -247,12 +249,22 @@ Einrichtung nach dem ersten Rebuild:
 2. **`/var/lib/pterodactyl-panel/secrets/app-key` sichern** (außerhalb des Servers).
    Ohne diesen Schlüssel sind API-Keys, Node-Tokens und 2FA nicht mehr lesbar.
 3. Im Panel unter *Admin → Locations* einen Standort anlegen, dann unter *Admin → Nodes* eine Node:
-   - FQDN: `10.0.0.5`, *Communicate Over SSL*: **HTTP**, *Behind Proxy*: nein
-   - Daemon Port: **8443**, Daemon SFTP Port: **2022**
+   - FQDN: `wings.lmlzr.com`, *Communicate Over SSL*: **SSL**, *Behind Proxy*: **ja**
+   - Daemon Port: **443** (Port am VPS), Daemon SFTP Port: **2022**
 4. Bei der Node unter *Configuration* den Inhalt nach `/etc/pterodactyl/config.yml` kopieren
    (`sudo nano /etc/pterodactyl/config.yml`), dann `sudo systemctl restart wings`.
    Vorher startet Wings absichtlich nicht.
-5. Unter *Allocation* die IP `10.0.0.5` mit den Ports aus `services/gameserver-ports.nix` anlegen.
+   **Danach in der Datei von Hand ändern:** `api.port: 8443` und `api.ssl.enabled: false`
+   (das Panel schreibt dort 443/SSL hinein; https macht nginx auf dem VPS). Sonst startet
+   Wings nicht oder der VPS erreicht es nicht. Gilt bei jedem erneuten Kopieren.
+5. Unter *Allocation* die IP `10.0.0.5` mit den Ports aus `services/gameserver-ports.nix` anlegen,
+   als *IP Alias* die Adresse für Spieler (z. B. `minecraft.lmlzr.com`); die zeigt das Dashboard an.
+
+Wege: Browser → `hosting.lmlzr.com` (Cloudflare-Tunnel) fürs Panel; Browser → `wings.lmlzr.com`
+(DNS only → VPS, nginx + certbot, `vps/nginx-wings.conf`) → WireGuard → `10.0.0.5:8443` für
+Konsole und Dateien. Uploads im Browser bis 100 MB. SFTP (2022) nur im LAN.
+Neuer DNS-Name im LAN nicht auflösbar? Pi-hole hat noch „gibt es nicht“ gespeichert:
+auf vmdocker `docker exec pihole pihole reloaddns`.
 
 Ohne SMTP landen Panel-Mails (z. B. Passwort-Reset) nur im Log
 (`/var/lib/pterodactyl-panel/storage/logs`). SMTP lässt sich über
@@ -332,10 +344,9 @@ Pool `fast`: einzelne NVMe (WD Blue SN580 1 TB) nur für die Dienst-Daten, damit
 schlafen können. Kein Mirror, deshalb die nächtliche Kopie auf `tank`.
 Einrichtung und Wiederherstellung: **[docs/SSD-SERVICES.md](docs/SSD-SERVICES.md)**.
 
-Lese-Cache (L2ARC) von `tank`: Intenso SATA-SSD 256 GB, nur Metadaten (`secondarycache=metadata`),
-übersteht Neustarts. Ohne ihn liest der nginx-Cache-Loader des Lancache nach jedem nginx-Start
-~15 min lang die Datei-Infos aller Cache-Dateien von den HDDs. Fällt die SSD aus, läuft `tank`
-ohne Cache weiter. Entfernen: `sudo zpool remove tank ata-INTENSO_5680079419EE00164834`.
+Kein Lese-Cache (L2ARC) mehr: die Intenso-SSD wurde am 2026-10-29 aus `tank` entfernt, ihr
+SATA-Port ist für das Blu-ray-Laufwerk vorgesehen. Folge: der nginx-Cache-Loader des Lancache liest nach jedem nginx-Start
+~15 min lang die Datei-Infos aller Cache-Dateien von den HDDs.
 
 Spindown: die beiden HDDs schalten nach 15 min Leerlauf ab (`modules/hdd-spindown.nix`, hd-idle);
 Zustand: `sudo hdparm -C /dev/disk/by-id/wwn-0x5000c500e7ab0441`.
