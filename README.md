@@ -15,6 +15,7 @@ dem VPS), siehe „Pterodactyl“.
 | Dienst | Adresse | Erreichbar | Hinweis |
 |---|---|---|---|
 | Jellyfin | http://neotokyo:8096 | LAN | HTTPS: 8920 (nur mit eigenem Zertifikat) |
+| ErsatzTV | http://neotokyo:8409 | LAN | eigene TV-Sender aus der Mediathek, in Jellyfin als Live TV (M3U/XMLTV); siehe `containers/ersatztv.nix` |
 | Audiobookshelf | http://neotokyo:13378 | LAN | |
 | Stirling-PDF | http://neotokyo:8083 | LAN | |
 | Sonarr | http://neotokyo:8989 | LAN | |
