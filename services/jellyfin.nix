@@ -41,4 +41,17 @@ in
   system.activationScripts.jellyfinConfigDataLink.text = ''
     if [ -L /config/data ]; then rm /config/data; fi
   '';
+
+  # Jellyfin 12 ignoriert standardmaessig den alten Header X-Emby-Token / ?api_key=.
+  # ErsatzTV (containers/ersatztv.nix) meldet sich nur so an, sonst 401.
+  systemd.services.jellyfin.preStart = ''
+    f=${config.services.jellyfin.configDir}/system.xml
+    if [ -f "$f" ]; then
+      if grep -q '<EnableLegacyAuthorization>' "$f"; then
+        sed -i 's|<EnableLegacyAuthorization>[^<]*</EnableLegacyAuthorization>|<EnableLegacyAuthorization>true</EnableLegacyAuthorization>|' "$f"
+      else
+        sed -i 's|</ServerConfiguration>|  <EnableLegacyAuthorization>true</EnableLegacyAuthorization>\n</ServerConfiguration>|' "$f"
+      fi
+    fi
+  '';
 }
