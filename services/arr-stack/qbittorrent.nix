@@ -17,6 +17,7 @@ in
     # 10.0.0.0/8 wuerde z.B. ProtonVPNs 10.2.0.x (Tunnel/DNS) am VPN vorbei leiten.
     accessibleFrom = [
       "10.0.0.0/24"      # Heimnetz
+      "10.10.0.0/24"     # WireGuard ueber den VPS (Handy, Absender 10.10.0.1), vps/setup-phone-vpn.sh
       "192.168.122.0/24" # libvirt-Netz der Test-VM
     ];
     portMappings = [
