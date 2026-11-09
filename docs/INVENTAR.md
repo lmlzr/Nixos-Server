@@ -1,8 +1,8 @@
 # Inventar (Stand 09.11.2026)
 
-Hardware und Software im Homelab. neotokyo ist direkt am Rechner abgelesen und mit der Konfiguration
-in diesem Repo abgeglichen. Die anderen Geräte sind nur kurz aus früheren Notizen übernommen und
-nicht neu geprüft.
+Hardware und Software von neotokyo, direkt am Rechner abgelesen und mit der Konfiguration
+in diesem Repo abgeglichen. Router (Proxmox, OPNsense, vmdocker) und VPS:
+[NETZWERK-INVENTAR.md](NETZWERK-INVENTAR.md).
 
 ## neotokyo (Server, 10.0.0.5)
 
@@ -35,7 +35,7 @@ nicht neu geprüft.
 | Medien | Jellyfin, Audiobookshelf, Immich (Fotos; mit Machine Learning, PostgreSQL, Redis) |
 | Arr-Stack | Sonarr, Radarr, Lidarr, Prowlarr, FlareSolverr, Seerr (Anfragen) |
 | Downloads | qBittorrent über Proton-VPN (eigener Netzwerk-Namespace, Port-Weiterleitung, Watchdog), SABnzbd |
-| Spiele | Pterodactyl Panel + Wings (Gameserver; nginx/PHP, MySQL, Redis), Lancache (Spiele-Download-Cache) mit Steam-Vorladen |
+| Spiele | Pterodactyl Panel + Wings (Gameserver; nginx/PHP, MySQL, Redis), Lancache (Spiele-Download-Cache), SteamPrefill (täglich 04:00) |
 | Dateien / Netz | Samba (SMB-Freigaben), iVentoy (Netzwerk-Boot) |
 | Werkzeuge | Stirling-PDF, Glances (Systemwerte für Homepage), Checkmk-Agent (Überwachung) |
 
@@ -50,15 +50,11 @@ nicht neu geprüft.
 | Bookshelf | Bücher (Nachfolger von Readarr) |
 | ErsatzTV | eigene TV-Sender aus der Mediathek |
 | LiteLLM + PostgreSQL | KI-Schnittstelle |
-| Lancache-Dashboard | Anzeige des Spiele-Caches |
+| LANCache Manager | Spiele-Cache: Statistik, Cache-Browser, Vorladen im Browser (Steam, Epic, Battle.net, Riot) |
 | Portainer | Docker-Verwaltung im Browser |
 
-## Andere Geräte (aus früheren Notizen, nicht neu geprüft)
+## Andere Geräte
 
-| Gerät | Hardware | Software |
-|---|---|---|
-| Proxmox-Host | Intel Core i5-8500T | VM **OPNsense** (Router, durchgereichte Intel-I226-V-Karte); VM **vmdocker** (10.0.0.3): Home Assistant, Pi-hole, Homepage, Mealie, ntfy, Firefox, Karakeep u. a. |
-| VPS (example.com) | IONOS, 1 vCPU, 847 MB RAM | Debian, nginx-Weiterleitung der Dienste, WireGuard (`wg0`), nftables-Weiterleitung der Gameserver-Ports |
-| Raspberry Pi | – | EarnApp, WireGuard |
-| Netzwerk | Omada-Switches und -Access-Point | – |
-| Strom | Shelly-Steckdosen (eine misst das ganze Rack) | – |
+Proxmox-Router mit OPNsense und vmdocker sowie der VPS stehen ausführlich in
+[NETZWERK-INVENTAR.md](NETZWERK-INVENTAR.md). Nicht erfasst: Raspberry Pi (EarnApp, WireGuard),
+Omada-Switches und -Access-Point, Shelly-Steckdosen (eine misst das ganze Rack).
