@@ -49,9 +49,23 @@ let
         model = "${p}/*";
         api_key = "os.environ/${env}";
       };
-    }) providers;
+    }) providers ++ [
+      # DeepSeek mit Bildern: LiteLLMs DeepSeek-Anbieter macht aus jeder Nachricht reinen Text
+      # und wirft Bilder weg. Ueber den generischen OpenAI-Weg gehen sie unveraendert durch.
+      # Exakter Name schlaegt die Wildcard "deepseek/*".
+      {
+        model_name = "deepseek/deepseek-v4-flash-vision-exp";
+        litellm_params = {
+          model = "openai/deepseek-v4-flash-vision-exp";
+          api_base = "https://api.deepseek.com/v1";
+          api_key = "os.environ/DEEPSEEK_API_KEY";
+        };
+      }
+    ];
     litellm_settings = {
       drop_params = true; # Parameter, die ein Anbieter nicht kennt, weglassen statt Fehler
+      # json_schema -> json_object fuer DeepSeek & Co., siehe litellm-json-schema.py
+      callbacks = [ "json_schema_hook.proxy_handler_instance" ];
     };
     general_settings = {
       master_key = "os.environ/LITELLM_MASTER_KEY";
@@ -101,7 +115,10 @@ in
     };
     containers.litellm = {
       image = "ghcr.io/berriai/litellm-database:v1.99.4";
-      volumes = [ "${litellmConfig}:/app/config.yaml:ro" ];
+      volumes = [
+        "${litellmConfig}:/app/config.yaml:ro"
+        "${./litellm-json-schema.py}:/app/json_schema_hook.py:ro"
+      ];
       cmd = [ "--config" "/app/config.yaml" "--port" (toString port) ];
       environmentFiles = [ secrets ];
       environment = {

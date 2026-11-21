@@ -12,6 +12,7 @@
       ./modules/optimizations.nix
       ./modules/mail.nix
       ./modules/shell.nix
+      ./modules/private.nix
 
       # NAS: ZFS-Pool tank (nur auf der echten Hardware; in der Test-VM auskommentieren)
       ./Hardware/storage.nix
@@ -26,15 +27,21 @@
       ./users/dbglas.nix
 
       ./containers/portainer.nix
-      ./containers/lancache-dashboard.nix
+      ./containers/lancache-manager.nix
+      ./containers/filebrowser.nix
       ./containers/handbrake-makemkv.nix
       ./containers/arm.nix
+      ./containers/episode-matcher.nix
       ./containers/bookshelf.nix
       ./containers/litellm.nix
       ./containers/ersatztv.nix
+      ./containers/tdarr.nix
+      ./containers/romm.nix
+      ./containers/romarr.nix
       #./containers/firefox.nix
 
       ./services/jellyfin.nix
+      ./services/glances.nix
       #./services/home-assistant.nix
       #./services/karakeep.nix
       #./services/mealie.nix
@@ -42,7 +49,14 @@
       ./services/docker.nix
       ./services/stirling-pdf.nix
       ./services/audiobookshelf.nix
+      ./services/komga.nix
+      ./services/suwayomi.nix
+      ./services/btc-lottery.nix
+      ./services/kapowarr.nix
+      ./services/freshrss.nix
+      ./services/trakt-rss.nix
       ./services/lancache.nix
+      ./services/local-https.nix
       ./services/smb.nix
       #./services/mosquitto.nix
 
@@ -66,15 +80,16 @@
   # Daten-HDDs nach 15 min Leerlauf abschalten (nur echte Hardware)
   nas.spindown.enable = true;
 
-  # Automatic Ripping Machine, siehe containers/arm.nix. Vorbereitet, aus: Laufwerk noch nicht eingebaut.
-  nas.arm.enable = false;
+  # Automatic Ripping Machine, siehe containers/arm.nix
+  nas.arm.enable = true;
 
   services.pterodactyl = {
     panel.enable = true;
     # Aufruf ueber Cloudflare-Tunnel (Container jolly_turing auf vmdocker 10.0.0.3).
     # Wings: wings.example.com per nginx auf dem VPS, siehe vps/nginx-wings.conf
-    panel.appUrl = "https://hosting.example.com";
-    panel.trustedProxies = [ "10.0.0.3" ];
+    panel.appUrl = "https://hosting.${config.nas.private.DOMAIN}"; # Domain: modules/private.nix
+    # 10.0.0.3: Cloudflare-Tunnel auf vmdocker, 10.10.0.1: nginx auf dem VPS (WireGuard)
+    panel.trustedProxies = [ "10.0.0.3" "10.10.0.1" ];
     # Mails (Passwort-Reset, Einladungen) ueber Proton; Token: TOKEN_PTERODACTYL
     panel.settings = {
       MAIL_MAILER = "smtp";

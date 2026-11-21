@@ -1,6 +1,19 @@
 # Nixos-Server
 Nixos Server config for switching von proxmox to nix
 
+## Private Werte (Domain, Mail)
+
+Die echte Domain und die VPS-IP stehen nirgends im Repo; in Doku und VPS-Vorlagen steht
+`example.com` bzw. `203.0.113.10`. Was NixOS wirklich braucht (Pterodactyl-URL, Mail-Absender und
+-Empfänger), kommt aus `~/.config/nixos-private/werte.env` außerhalb des Repos, eingelesen als
+Flake-Eingang `private` (`modules/private.nix`). Vorlage und Anleitung: `private/werte.env.example`.
+
+- Neuer Rechner: Vorlage kopieren und anpassen, sonst bricht der Rebuild ab (Eingang fehlt).
+- Nach einer Änderung der Datei: `nrs` (liest sie neu ein) oder `nix flake update private`, sonst
+  baut Nix weiter mit dem alten Stand.
+- Die VPS-Dateien unter `vps/` sind Vorlagen mit Platzhaltern. Die echten Dateien liegen nur auf dem
+  VPS (certbot hat sie erweitert), neue Blöcke dort anhängen statt die Dateien zu ersetzen.
+
 ## Dienste und Ports
 
 Erreichbar unter `http://neotokyo:<port>` bzw. `http://10.0.0.5:<port>`.
@@ -26,12 +39,25 @@ dem VPS), siehe „Pterodactyl“.
 | qBittorrent | http://neotokyo:8080 | LAN | läuft im VPN-Namespace; vom Server selbst: `192.168.15.1:8080` |
 | Pterodactyl Panel | https://hosting.example.com | öffentlich | Cloudflare-Tunnel (vmdocker) → `10.0.0.5:8090`; nur über diese Adresse verbindet die Konsole (`APP_URL`) |
 | Portainer | https://neotokyo:9443 | LAN | Docker-Verwaltung; Port 8000 nur für Edge-Agents |
-| Lancache-Dashboard | http://neotokyo:3000 | LAN | Downloads, HIT/MISS, Clients, gecachte Spiele; siehe „Lancache“ |
+| LANCache Manager | http://10.0.0.5:8087 | LAN | Dashboard + Vorladen im Browser (Steam, Epic, Battle.net, …); siehe „Lancache“ |
+| FileBrowser Quantum | http://10.0.0.5:8088 | LAN + öffentlich | Dateien in `tank/share/lmlzr`, Freigabe-Links; von außen `https://files.<DOMAIN>` (nginx auf dem VPS); `containers/filebrowser.nix` |
 | iVentoy | http://10.0.0.5:26000 | LAN | Netzwerk-Boot von ISOs, ohne Anmeldung; siehe „Netzwerk-Boot (iVentoy)“ |
 | HandBrake | http://neotokyo:5800 | LAN | Video umwandeln mit NVENC; siehe „HandBrake und MakeMKV“ |
 | MakeMKV | http://neotokyo:5801 | LAN | Discs/ISOs nach MKV |
+| ARM | http://neotokyo:8095 | LAN | Discs automatisch rippen, siehe „Automatic Ripping Machine“ |
+| Episode Matcher | http://neotokyo:8001 | LAN | Folgen in Rips erkennen und benennen, siehe „Folgen erkennen (Episode Matcher)“ |
 | Bookshelf | http://neotokyo:8787 | LAN | Bücher/Hörbücher (Readarr-Nachfolger), siehe „Bookshelf“ |
 | Immich | http://neotokyo:2283 | LAN | Fotos/Videos vom Handy, siehe „Immich“ |
+| Tdarr | http://10.0.0.5:8265 | LAN | fremdsprachige Ton-/Untertitelspuren entfernen, NVENC-HEVC; `containers/tdarr.nix` |
+| Komga | http://10.0.0.5:25600 | LAN + öffentlich | Manga/Comics/E-Books lesen, OPDS; von außen `https://books.<DOMAIN>`; siehe „Manga, Comics und News“ |
+| Suwayomi | http://10.0.0.5:4567 | LAN | lädt neue Manga-Kapitel, siehe „Manga, Comics und News“ |
+| Kapowarr | http://10.0.0.5:5656 | LAN | Comics von GetComics, `services/kapowarr.nix` |
+| FreshRSS | http://10.0.0.5:8097 | LAN + öffentlich | News-Reader; von außen `https://news.<DOMAIN>` |
+| Trakt-RSS + MAL-Sync | http://10.0.0.5:8098 | LAN | Trakt-Kalender als RSS, Abgleich Trakt/Komga → MyAnimeList |
+| RomM | http://10.0.0.5:8089 | LAN | ROM-Sammlung, Spielen im Browser; `containers/romm.nix` |
+| ROMarr | http://10.0.0.5:6868 | LAN | holt ROMs über Prowlarr/qBittorrent in die RomM-Bibliothek |
+| BTC-Lotterie | http://10.0.0.5:8099 | LAN | Solo-Mining zum Spaß, `services/btc-lottery.nix` |
+| Glances | http://10.0.0.5:61208 | LAN | Systemwerte als API für die Homepage-Widgets |
 
 ### Sonstige Ports
 
@@ -50,6 +76,7 @@ dem VPS), siehe „Pterodactyl“.
 | Redis (Pterodactyl) | Socket | lokal | nur Unix-Socket |
 | Lancache Metrics | 8080/tcp | lokal | nginx auf `localhost`; aus dem LAN geht 8080 an qBittorrent |
 | FlareSolverr | 8191/tcp | lokal | Cloudflare-Umgehung für Prowlarr (`services/arr-stack/flaresolverr.nix`) |
+| Lokaler HTTPS-Proxy | 443/tcp auf `10.0.0.6` | LAN | öffentliche Namen im Heimnetz direkt statt über den VPS (Pi-hole zeigt sie auf `10.0.0.6`); `services/local-https.nix` |
 | iVentoy PXE | 69/udp (TFTP), 16000/tcp (HTTP), 10809/tcp (NBD) | LAN | nur LAN-Schnittstelle; 67/udp (DHCP) bewusst zu |
 
 Laufen inzwischen auf einem anderen Host (hier auskommentiert): Home Assistant, Karakeep,
@@ -91,9 +118,13 @@ Backup einspielen (Dienst vorher stoppen, Datei muss für `jellyfin` lesbar sein
   Prüfen: `dig +short AAAA lancache.steamcontent.com @10.0.0.3` muss leer sein.
 - Steam erkennt den Cache nur beim Start; im Steam-Log `content_log.txt` steht dann
   `Enabling local content cache at …10.0.0.5`.
-- **Dashboard** (`containers/lancache-dashboard.nix`, [imahmud1/lancache-dashboard](https://github.com/imahmud1/lancache-dashboard)):
-  liest `/var/log/nginx/lancache/access.log` (Container mit Gruppe `nginx`), Datenbank unter
-  `/mnt/tank/services/lancache-dashboard`. Prefill-Traffic (`10.0.0.5`) ist aus der Client-Statistik ausgeblendet.
+- **LANCache Manager** (`containers/lancache-manager.nix`, [regix1/lancache-manager](https://github.com/regix1/lancache-manager)):
+  http://10.0.0.5:8087, Dashboard und Vorladen im Browser (startet dafür eigene Prefill-Container
+  über den Docker-Socket, lädt über `10.0.0.5`). Log schreibbar (`--pid=host` für nginx-Reopen),
+  Cache nur lesend. Anmeldung in v1.10.6 immer mit API-Key + Benutzer + Passwort (Key:
+  `docker exec lancache-manager cat /data/security/api_key.txt`); reine Passwort-Anmeldung erst ab
+  der nächsten Version. Ersetzt seit 2026-11-09 das alte Dashboard (imahmud1, Port 3000; dessen
+  Daten liegen noch in `/mnt/fast/services/lancache-dashboard`).
 
 ## Netzwerk-Boot (iVentoy)
 
@@ -149,31 +180,116 @@ bei jedem Start frisch aus dem Nix-Paket. Neue Version: `version`/`sha256` in `s
 - **NVENC:** GPU per CDI (`hardware.nvidia-container-toolkit`, `--device=nvidia.com/gpu=all`).
   In HandBrake als Video-Encoder *H.264 (NVEnc)* oder *H.265 (NVEnc)* wählen.
 - **Ordner** (SMB-Freigabe `media` → `Transcode`):
-  - `Transcode/MakeMKV`: Ausgabe von MakeMKV
-  - `Transcode/HandBrake-Watch`: was hier landet, kodiert HandBrake automatisch (Standard-Preset)
+  - `Transcode/MakeMKV`: fertige Rips von MakeMKV. MakeMKV schreibt zuerst auf die NVMe
+    (`/mnt/fast/incomplete/makemkv`, im Container `/output`); `makemkv-move` verschiebt alle 5 min,
+    was seit 5 min unverändert und nicht mehr geöffnet ist (`journalctl -u makemkv-move`).
+  - `Transcode/HandBrake-Watch`: was hier landet, kodiert HandBrake automatisch (*H.265 NVENC 1080p*,
+    MKV, Dekodieren per NVDEC; in der Oberfläche gilt das nicht, dort pro Auftrag wählen)
   - `Transcode/HandBrake-Output`: Ergebnis
   - Die ganze Mediathek liegt in beiden unter `/storage`, les- und schreibbar: Ergebnis direkt
     nach `Movies`/`TV` speichern, Blu-ray-ISOs aus `ISOs` rippen.
-- **Kein optisches Laufwerk eingebaut:** MakeMKV verarbeitet ISO-Dateien und Disc-Ordner. Für
-  ein (USB-)Laufwerk `--device=/dev/sr0` und das passende `/dev/sgN` in `extraOptions` ergänzen.
+- **Laufwerk:** Das Blu-ray-Laufwerk gehört ARM allein, MakeMKV verarbeitet nur ISOs und
+  Disc-Ordner. Wer es in MakeMKV nutzen will, braucht dort ebenfalls `sdf_Stop` (siehe ARM).
 - Einstellungen: `/mnt/fast/services/handbrake` bzw. `…/makemkv`.
 
-## Automatic Ripping Machine (vorbereitet, aus)
+## Automatic Ripping Machine
 
-`containers/arm.nix`, Schalter `nas.arm.enable` (steht auf `false`, das Blu-ray-Laufwerk ist noch
-nicht eingebaut). [ARM](https://github.com/automatic-ripping-machine/automatic-ripping-machine):
+`containers/arm.nix`, Schalter `nas.arm.enable`.
+[ARM](https://github.com/automatic-ripping-machine/automatic-ripping-machine):
 Disc einlegen → Titel über OMDb/TMDb erkennen → mit MakeMKV rippen → mit HandBrake (NVENC)
 umwandeln → als `Titel (Jahr)` ablegen → auswerfen. Weboberfläche: http://neotokyo:8095.
 
-**Wenn das Laufwerk drin ist:**
-1. Prüfen, dass es erkannt wird: `ls /dev/sr*` (meist `/dev/sr0`).
-2. `nas.arm.enable = true;` in `configuration.nix`, Rebuild.
-3. In ARM unter *Settings*: OMDb-API-Schlüssel eintragen (kostenlos, https://www.omdbapi.com/apikey.aspx),
-   HandBrake-Vorlagen auf NVENC stellen (`HB_PRESET_DVD`/`HB_PRESET_BD`, z. B. *H.265 NVENC 1080p*).
-4. Testdisc einlegen.
+- OMDb-Schlüssel: `/etc/secrets/arm-omdb-key` (nur der Key, kostenlos unter
+  https://www.omdbapi.com/apikey.aspx).
+- Vorlagen stehen in der Nix-Datei und werden bei jedem Start in `arm.yaml` geschrieben:
+  *H.265 NVENC 1080p* für DVD und Blu-ray, Ton und Untertitel `deu,eng,ita` (`hbArgs`), Ton wird
+  unverändert kopiert, Untertitel werden nie eingebrannt.
+- **Falsche Titel prüfen:** Findet OMDb das Disc-Label nicht, kürzt ARM es Wort für Wort und nimmt
+  den ersten Treffer (`MARVELS_THOR_…` wurde „Mechanical Marvels“). Nach dem Einlegen in der
+  Oberfläche prüfen: ARM wartet 5 Minuten auf eine Korrektur, erst dann beginnt der Rip.
+- **Hängender Job:** In der Oberfläche den Job abbrechen (*Abandon*). Solange er aktiv ist, lehnt
+  ARM neue Discs mit `Job already running` ab.
+- **`sdf_Stop`:** Ohne diesen Eintrag in `home/.MakeMKV/settings.conf` hängt `makemkvcon` auf
+  Volllast, ohne die Disc zu lesen (Log endet bei `Starting MakeMKV rip`). Der Wert passt nur zu
+  diesem Laufwerk samt Firmware: Neues Laufwerk → Wert aus dem Debug-Log (`SDF auto …`) eintragen.
+- **`start_udev.sh` ist ersetzt:** Das Original im Image führt `udevadm trigger --action=add` aus.
+  Im privilegierten Container trifft das alle Geräte des Hosts und reißt Docker mit allen Containern
+  herunter. Bei einem neuen ARM-Image prüfen, ob `/etc/my_init.d/start_udev.sh` noch so heißt.
+- **Kein 4K-UHD:** Das Laufwerk (BH08LS20, 2008/09) liest keine UHD-Discs, auch nicht mit anderem
+  Treiber oder anderer Firmware. Dafür bräuchte es ein LibreDrive-taugliches Laufwerk.
 
-Ablage: `media/Transcode/ARM/` (`raw`, `transcode`, `completed`), Musik-CDs nach `media/Music`.
+Ablage: Rippen und Umwandeln auf der NVMe (`/mnt/fast/incomplete/arm/raw` und `…/transcode`, ohne
+Snapshots), das fertige Ergebnis nach `media/Transcode/ARM/completed`; Musik-CDs nach `media/Music`.
+Die HDDs laufen so nur beim Verschieben.
 Läuft mit `--privileged` (eigener udev im Container erkennt eingelegte Discs).
+
+## Folgen erkennen (Episode Matcher)
+
+`containers/episode-matcher.nix`, Oberfläche http://neotokyo:8001.
+[MKV Episode Matcher](https://github.com/Jsakkos/mkv-episode-matcher) erkennt in Disc-Rips
+(`B1_t01.mkv`, `title_t00.mkv`, …), welche Folge das ist: Whisper wandelt ein paar Ausschnitte
+Ton in Text um, der wird mit den Untertiteln der Staffel verglichen (OpenSubtitles, Episodenliste
+von TMDb). Ergebnis: `Doctor Who 2005 - S01E04.mkv`. Nur Serien, keine Filme.
+
+**Folgen benennen (Rips von ARM/MakeMKV):**
+
+1. Die Rips einer Staffel in einen Ordner nach dem Schema `Serie/Season N/` legen, irgendwo unter
+   `media/Transcode`, z. B. `Transcode/ARM/completed/tv/Doctor Who (2005)/Season 1/`. Serie und
+   Staffel liest das Programm aus den Ordnernamen. Dateinamen sind egal, nur kein `S01E02` darin
+   (solche Dateien gelten als erledigt und werden übersprungen). Specials: `Season 0`.
+2. In der Oberfläche den Ordner wählen, *Scan*, Vorschläge prüfen, umbenennen lassen.
+   Oder auf der Kommandozeile, erst ohne Umbenennen (`--dry-run`):
+   ```
+   docker exec -it episode-matcher mkv-match match "/mnt/tank/media/Transcode/…/Season 1" --dry-run --tmdb-id 57243
+   ```
+   `--tmdb-id` bei mehrdeutigen Namen (57243 = Doctor Who 2005, die ID steht in der TMDb-Adresse).
+3. In Sonarr *Manueller Import* auf den Ordner: Sonarr ordnet nach `S01E04` zu, benennt nach dem
+   eigenen Schema um (`Doctor Who (2005) - S01E04 - Aliens of London`) und verschiebt nach `TV`.
+   Die Serie muss in Sonarr stehen (ohne Überwachung, dann wird nichts heruntergeladen).
+
+Was nicht erkannt wird, bleibt unverändert liegen: Extras/Making-ofs (keine Untertitel),
+„Alle abspielen“-Titel, Doppelfolgen, Folgen mit falschem Untertitel bei OpenSubtitles
+(Doctor Who 2005 S01E01 bekam einen von Doctor Who 2023). Extras gehören bei der Serie in einen
+Unterordner `extras` (Jellyfin zeigt sie dann unter „Extras“).
+
+**Schon benannte Staffeln prüfen** (findet falsch nummerierte Folgen, ändert nichts; `TV` und
+`Movies` sind im Container nur lesbar):
+```
+docker exec episode-matcher episode-verify "/mnt/tank/media/TV/Friends/Season 03"
+docker exec episode-matcher episode-verify "/mnt/tank/media/TV/Friends"                 # ganze Serie
+docker exec episode-matcher episode-verify "/mnt/tank/media/TV/Friends" --seasons 1,4-6 # nur diese
+```
+Weitere Optionen: `--tmdb-id N`, `--no-specials`. Ausgabe je Datei `ok`, `FALSCH` (mit der Folge laut
+Inhalt) oder `unklar`. Umbenennen danach in Sonarr oder von Hand.
+
+Die Liste kommt nur im Terminal. In eine Datei umleiten (ohne `-it`, sonst landen Steuerzeichen
+darin), mit `tee` zusätzlich auf dem Bildschirm; unter `Transcode` ist sie per SMB vom PC lesbar:
+```
+docker exec episode-matcher episode-verify "/mnt/tank/media/TV/Friends" > ~/friends-pruefung.txt
+docker exec episode-matcher episode-verify "/mnt/tank/media/TV/Friends" | tee /mnt/tank/media/Transcode/friends-pruefung.txt
+```
+
+- **Zugangsdaten:** TMDb-*API-Schlüssel* (v3, 32 Zeichen, nicht das Lese-Token) und
+  OpenSubtitles.com (API-Key von https://www.opensubtitles.com/en/consumers, dazu Benutzer und
+  Passwort). Stehen in `/mnt/fast/services/episode-matcher/.mkv-episode-matcher/config.json`
+  (Oberfläche → Settings). Nach Änderungen an der Datei: `docker restart episode-matcher`.
+- **Download-Limit:** Kostenlose OpenSubtitles-Konten laden nur eine begrenzte Zahl Untertitel pro
+  Tag. Jeder wird nur einmal geladen (Cache unter `…/.mkv-episode-matcher/cache`). Große Serien
+  Staffel für Staffel prüfen; was am Limit scheitert, ist `unklar` und geht am nächsten Tag.
+- **Dauer:** Whisper (Modell *small*) läuft auf der CPU, ca. 20–60 s pro Folge.
+- **Installation:** kein fertiges Image. `python:3.12-slim`, das Paket wird beim ersten Start in
+  `/mnt/fast/services/episode-matcher/venv` installiert (~1,1 GB, ~2 min). Version und Korrekturen
+  stehen in der Nix-Datei: `av<18` (PyAV 19 bricht faster-whisper), Arbeitsordner `/data`
+  (Untertitel werden zuerst ins aktuelle Verzeichnis geladen), englische Tonspur für den Vergleich
+  (die Untertitel sind Englisch), PAL-Patch `containers/episode-matcher-pal.py`: europäische DVDs
+  laufen 4 % schneller als die Untertitel, ohne den Patch passte bei Doctor Who kaum etwas
+  (2 statt 9 von 10). Untertitel-Patch `containers/episode-matcher-subs.py`: das Programm nahm nur
+  die erste Ergebnisseite von OpenSubtitles und lud nichts nach, sobald 3 Untertitel im Cache lagen
+  (Friends S01: 7 von 24 Folgen, mit Patch 19 von 24 erkannt). Außerdem wählt er pro Folge den
+  besten Untertitel statt des ersten Treffers (OpenSubtitles führt unter einer Folge auch falsch
+  hochgeladene Dateien; bei Doctor Who S02 waren 7 von 13 falsch, mit Patch 5 von 5 erkannt).
+- **Falscher Untertitel im Cache:** Erkennt er eine Folge trotz Untertitel nie („0 successful
+  segments“), die `.srt` der fehlenden Folgen aus `…/cache/data/<Serie>/` entfernen und neu scannen.
 
 ## Bookshelf
 
@@ -191,6 +307,13 @@ das Admin-Konto an; Handy-App „Immich“).
 - Vorschaubilder: `/mnt/fast/services/immich-thumbs`, per Bind-Mount nach `…/immich/thumbs`,
   damit Durchblättern die HDDs nicht weckt
 - Datenbank: PostgreSQL (`/var/lib/postgresql`), Gesichter/Suche auf der CPU
+- Machine Learning (in der Oberflächen-Config, nicht in Nix): Suche mit dem mehrsprachigen Modell
+  `nllb-clip-base-siglip__v1` (Suche auf Deutsch geht, Kontosprache auf Deutsch stellen),
+  Gesichter mit `buffalo_l`. Nach einem Modellwechsel unter *Aufträge → Intelligente Suche* alles
+  neu indexieren.
+- Falsches Kameradatum: in Immich nur die Datenbank ändern reicht nicht für Downloads. Originale
+  (gehören `immich`, nur mit sudo) mit `exiftool '-AllDates+=…'` verschieben, danach für die
+  Bilder *Metadaten aktualisieren*.
 
 Einmalig vor dem ersten Rebuild:
 ```bash
@@ -200,6 +323,42 @@ sudo mkdir -p /mnt/fast/services/immich-thumbs
 
 **Achtung:** Der Mirror schützt nur vor dem Ausfall einer Platte. Für Fotos fehlt noch ein Backup
 außer Haus.
+
+## Manga, Comics und News
+
+- **Komga** (`services/komga.nix`): Bibliotheken Manga, Comics, Bücher unter `/mnt/tank/media`.
+  Von außen über nginx auf dem VPS (`vps/nginx-books.conf`). MAL-Abgleich im Browser geht auch mit
+  der Erweiterung MALSync (Komga-Adresse als Custom Domain eintragen).
+- **Suwayomi** (`services/suwayomi.nix`) lädt nach `media/Manga-Downloads`; `manga-import`
+  (täglich 07:00, `services/manga-import.py`) legt Hardlinks in die Komga-Bibliothek.
+- **FreshRSS** (`services/freshrss.nix`), von außen `vps/nginx-news.conf`. Apps über die
+  Google-Reader-API (`https://news.<DOMAIN>/api/greader.php`).
+- **Trakt-RSS** (`services/trakt-rss.py`, Seite http://10.0.0.5:8098): Trakt-Kalender als Feeds
+  `/neu.xml` und `/bald.xml`, Filter `?nur=serien` oder `?nur=filme`. In FreshRSS z. B. als
+  `http://10.0.0.5:8098/neu.xml?1` eintragen (eigene URL, falls FreshRSS nach einem Fehler eine
+  Sperre für die alte gesetzt hat). Trakt-Anmeldung (PKCE) nur aus dem Heimnetz; der Redirect
+  läuft über `https://news.<DOMAIN>/trakt-callback` (Trakt verlangt https) zurück auf `:8098/callback`.
+- **MAL-Sync** (`services/malsync.py`, gleiche Seite): täglich 05:00 Trakt-Anime (Zuordnung über
+  Kometa-Anime-IDs, Filme über Fribb anime-lists) und gelesene Komga-Kapitel (Bibliothek „Manga“)
+  nach MyAnimeList. Zählt nur hoch, fasst „completed“ nicht an. Unklare Fälle (z. B. durchgehende
+  Folgenzählung wie One Piece) werden übersprungen und auf der Seite gelistet; manuelle
+  Manga-Zuordnungen bleiben gespeichert (0 = ignorieren).
+- Zugangsdaten (Trakt, MAL, Komga-API-Key) liegen nur in `/var/lib/trakt-rss`, nicht im Repo.
+
+## Unfertige Torrents
+
+qBittorrent lädt zuerst auf die NVMe, Fertiges wandert nach `media/downloads`. Das Dataset
+`fast/incomplete` (`/mnt/fast/incomplete`, Quota 600 GB) hat keine Snapshots und kein Backup, und die
+Quota verhindert, dass Torrents den Pool für die Dienste füllen.
+
+Einmalig vor dem ersten Rebuild:
+```bash
+sudo zfs create -o mountpoint=legacy -o quota=600G fast/incomplete
+```
+
+**Umstellung:** In qBittorrent unter *Optionen → Downloads → Unvollständige Torrents speichern in*
+`/mnt/fast/incomplete` eintragen. Erst wenn `/mnt/fast/services/qbittorrent/incomplete` nahezu leer
+ist: Laufende Torrents zieht qBittorrent beim Umstellen um, das kopiert ihre Daten innerhalb der NVMe.
 
 ## Usenet (SABnzbd)
 

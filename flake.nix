@@ -5,6 +5,11 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     lancache-nix.url = "github:menixator/lancache.nix";
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
+    # Private Werte (Domain, Mail) ausserhalb des Repos, siehe private/werte.env.example
+    private = {
+      url = "path:/home/lmlzr/.config/nixos-private";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, ... }@inputs:

@@ -12,11 +12,21 @@ let
   host = config.networking.hostName;
 in
 {
+  # tmux mit Maus: Fenster/Panes anklicken, Groesse ziehen, scrollen. Normal markieren und kopieren
+  # im Terminal geht mit gedrueckter Umschalttaste.
+  programs.tmux = {
+    enable = true;
+    terminal = "tmux-256color";
+    extraConfig = "set -g mouse on";
+  };
+
   programs.bash.interactiveShellInit = ''
     nrs() {
       (
         cd ${repo} || exit 1
         git pull --ff-only || { echo "git pull fehlgeschlagen (lokale Aenderungen?)"; exit 1; }
+        # private Werte (~/.config/nixos-private) neu einlesen, sonst gilt der alte Stand
+        nix flake update private
         sudo nixos-rebuild switch --flake .#${host}
       )
     }

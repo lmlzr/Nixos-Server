@@ -21,9 +21,6 @@ in
     interval = if onSsd then "*-*-* 03:25:00" else "hourly";
 
     templates = {
-      # Medien sind gross und wiederbeschaffbar: kurze Aufbewahrung, sonst bleibt
-      # Platz von geloeschten/ersetzten Filmen lange belegt
-      media = { hourly = 0; daily = 7; monthly = 0; yearly = 0; autosnap = true; autoprune = true; };
       # Nur taeglich: stuendliche Snapshots wuerden die HDDs jede Stunde aus dem Spindown wecken
       share = { hourly = 0; daily = 30; monthly = 6; yearly = 0; autosnap = true; autoprune = true; };
       # Auf der SSD stuendlich (vom Timer unten, sanoid raeumt mit auf), auf HDD nur taeglich
@@ -32,9 +29,10 @@ in
       backup = { hourly = 0; daily = 30; monthly = 6; yearly = 0; autosnap = false; autoprune = true; };
     };
 
-    # tank selbst und tank/lancache bekommen bewusst keine Snapshots
+    # tank selbst, tank/media, tank/lancache und fast/incomplete bekommen bewusst keine Snapshots.
+    # tank/media seit 2026-11-11 nicht mehr: gross und wiederbeschaffbar, und beim Aufraeumen/
+    # Umkodieren (Tdarr) blieb der Platz der alten Dateien sonst noch eine Woche belegt.
     datasets = {
-      "${pool}/media".use_template = [ "media" ];
       "${pool}/share".use_template = [ "share" ];
       ${cfg.servicesDataset}.use_template = [ "services" ];
     } // lib.optionalAttrs onSsd {

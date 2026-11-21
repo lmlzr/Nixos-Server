@@ -10,13 +10,13 @@ in
   options.nas.mail = {
     from = lib.mkOption {
       type = lib.types.str;
-      default = "service@example.com";
+      default = config.nas.private.MAIL_FROM; # modules/private.nix
       description = "Absender; die Adresse, fuer die der SMTP-Token erstellt wurde.";
     };
 
     alertTo = lib.mkOption {
       type = lib.types.str;
-      default = "service@example.com";
+      default = config.nas.private.MAIL_ALERT_TO;
       description = "Empfaenger fuer Warnungen (root, smartd, ZED, fehlgeschlagene Dienste).";
     };
 
@@ -56,7 +56,16 @@ in
     #   systemd.services.<name>.onFailure = [ "notify-mail@%n.service" ];
     systemd.services."notify-mail@" = {
       description = "Mail: %i ist fehlgeschlagen";
-      serviceConfig.Type = "oneshot";
+      # Ohne Netz oder DNS spaeter erneut versuchen (bis zu 12 h), sonst ginge die Warnung verloren.
+      unitConfig = {
+        StartLimitIntervalSec = "24h";
+        StartLimitBurst = 48;
+      };
+      serviceConfig = {
+        Type = "oneshot";
+        Restart = "on-failure";
+        RestartSec = "15min";
+      };
       path = [ pkgs.msmtp pkgs.systemd ];
       scriptArgs = "%i";
       script = ''

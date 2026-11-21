@@ -13,6 +13,9 @@ let
   start = pkgs.writeShellScript "claude-rc-start" ''
     set -u
     ${tmux} has-session -t claude-rc 2>/dev/null && exit 0
+    # network-online gilt schon mit Link-Local-Adresse (DHCP nach Stromausfall verspaetet).
+    # Ohne Netz gibt claude sofort auf und niemand startet es neu, also vorher pruefen.
+    curl -s -o /dev/null -m 10 https://api.anthropic.com/ || exit 1
     # Login-Shell: gleiche Umgebung (PATH, sudo-Wrapper) wie bei SSH
     ${tmux} new-session -d -s claude-rc -c ${home} "bash -lc 'claude remote-control; exec bash -l'"
 
@@ -33,10 +36,15 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
-    path = [ pkgs.bash pkgs.coreutils pkgs.gnugrep ];
+    path = [ pkgs.bash pkgs.coreutils pkgs.curl pkgs.gnugrep ];
+    # Ein Rebuild soll laufende Remote-Sitzungen nicht beenden.
+    restartIfChanged = false;
+    unitConfig.StartLimitIntervalSec = 0;
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      Restart = "on-failure";
+      RestartSec = "15s";
       User = user;
       WorkingDirectory = home;
       ExecStart = start;

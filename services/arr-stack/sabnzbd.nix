@@ -87,6 +87,7 @@ in
   };
 
   systemd.services.sabnzbd = {
+    wantedBy = [ "proton.service" ]; # siehe qbittorrent.nix
     requires = [ "sabnzbd-keys.service" ];
     after = [ "sabnzbd-keys.service" ];
     unitConfig.RequiresMountsFor = [ cfg.servicesDir cfg.mediaDir ];

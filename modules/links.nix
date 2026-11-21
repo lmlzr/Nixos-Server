@@ -12,6 +12,7 @@ let
   links = lib.filterAttrs (target: link: link.enable) {
     "/var/lib/jellyfin"             = { enable = config.services.jellyfin.enable;       service = "jellyfin";       source = "${root}/jellyfin";       owner = "jellyfin:jellyfin"; };
     "/var/lib/audiobookshelf"       = { enable = config.services.audiobookshelf.enable; service = "audiobookshelf"; source = "${root}/audiobookshelf"; owner = "audiobookshelf:audiobookshelf"; };
+    "/var/lib/komga"                = { enable = config.services.komga.enable;          service = "komga";          source = "${root}/komga";          owner = "komga:komga"; };
     "/var/lib/private/stirling-pdf" = { enable = config.services.stirling-pdf.enable;   service = "stirling-pdf";   source = "${root}/stirling-pdf";   owner = "root:root"; };
     "/var/lib/syncthing"            = { enable = config.services.syncthing.enable;      service = "syncthing";      source = "${root}/syncthing";      owner = "lmlzr:users"; };
     "/var/lib/sonarr"               = { enable = config.services.sonarr.enable;         service = "sonarr";         source = "${root}/sonarr";         owner = "sonarr:media"; };

@@ -8,6 +8,9 @@ in
   services.nginx.package = pkgs.nginxMainline.override {
     withSlice = true;
   };
+  # lancache.nix haengt "worker_processes" per appendConfig an, nixpkgs (ab 2026-11) schreibt es
+  # selbst (services.nginx.workerProcesses, default auto) -> "directive is duplicate", nginx startet nicht
+  services.nginx.appendConfig = lib.mkForce "";
 
   # LAN-Karte nicht von NetworkManager verwalten lassen, sonst kann NM die zusaetzliche
   # statische Lancache-IP beim Reconnect entfernen. DHCP uebernimmt dafuer dhcpcd.
@@ -17,6 +20,19 @@ in
 
   # nginx legt per LogsDirectory nur /var/log/nginx an, das Unterverzeichnis fuer logPrefix fehlt sonst
   systemd.tmpfiles.rules = [ "d ${config.services.lancache.logPrefix} 0750 nginx nginx -" ];
+
+  # Die nginx-Regel von NixOS erfasst nur /var/log/nginx/*.log, nicht den Unterordner. Rotiert
+  # wird hier und nicht im LANCache Manager (der sucht nginx nur in Docker-Containern).
+  services.logrotate.settings.lancache = {
+    files = "${config.services.lancache.logPrefix}/*.log";
+    frequency = "weekly";
+    rotate = 8;
+    compress = true;
+    delaycompress = true;
+    sharedscripts = true;
+    su = "nginx nginx";
+    postrotate = "[ ! -f /var/run/nginx/nginx.pid ] || kill -USR1 `cat /var/run/nginx/nginx.pid`";
+  };
 
   networking.interfaces.${lan} = {
     useDHCP = true;
