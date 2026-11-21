@@ -330,7 +330,9 @@ außer Haus.
   Von außen über nginx auf dem VPS (`vps/nginx-books.conf`). MAL-Abgleich im Browser geht auch mit
   der Erweiterung MALSync (Komga-Adresse als Custom Domain eintragen).
 - **Suwayomi** (`services/suwayomi.nix`) lädt nach `media/Manga-Downloads`; `manga-import`
-  (täglich 07:00, `services/manga-import.py`) legt Hardlinks in die Komga-Bibliothek.
+  (täglich 07:00, `services/manga-import.py`) legt Hardlinks in die Komga-Bibliothek und
+  stößt danach einen Komga-Scan von Manga und Comics an (API-Key in
+  `/var/lib/secrets/komga-scan.key`, nur root). Sonst scannt Komga nur einmal täglich.
 - **FreshRSS** (`services/freshrss.nix`), von außen `vps/nginx-news.conf`. Apps über die
   Google-Reader-API (`https://news.<DOMAIN>/api/greader.php`).
 - **Trakt-RSS** (`services/trakt-rss.py`, Seite http://10.0.0.5:8098): Trakt-Kalender als Feeds

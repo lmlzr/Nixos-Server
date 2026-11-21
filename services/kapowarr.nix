@@ -7,7 +7,8 @@
 # Einrichtung in der Oberflaeche:
 #   Settings -> General: ComicVine-API-Key (kostenlos, comicvine.gamespot.com/api)
 #   Settings -> Media Management: Root Folder /mnt/tank/media/Comics
-# Komga findet neue Hefte in der Bibliothek "Comics" beim naechsten Scan.
+# Komga findet neue Hefte in der Bibliothek "Comics" beim naechsten Scan (taeglich nach
+# manga-import um 07:00, siehe suwayomi.nix; sofort: in Komga "Bibliothek scannen").
 let
   cfg = config.nas;
   port = 5656;
