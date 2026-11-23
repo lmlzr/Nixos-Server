@@ -53,6 +53,7 @@
       ./services/suwayomi.nix
       ./services/btc-lottery.nix
       ./services/kapowarr.nix
+      ./services/mylar3.nix
       ./services/freshrss.nix
       ./services/trakt-rss.nix
       ./services/lancache.nix

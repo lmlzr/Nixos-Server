@@ -36,6 +36,7 @@ dem VPS), siehe „Pterodactyl“.
 | Lidarr | http://neotokyo:8686 | LAN | |
 | Prowlarr | http://neotokyo:9696 | LAN | |
 | Seerr | http://neotokyo:5055 | LAN | Film-/Serienwünsche (früher Jellyseerr); Einrichtung siehe unten |
+| Cleanuparr | http://neotokyo:11011 | LAN | Hängende Downloads entfernen, blocklisten und neu suchen; Einrichtung siehe unten |
 | qBittorrent | http://neotokyo:8080 | LAN | läuft im VPN-Namespace; vom Server selbst: `192.168.15.1:8080` |
 | Pterodactyl Panel | https://hosting.example.com | öffentlich | Cloudflare-Tunnel (vmdocker) → `10.0.0.5:8090`; nur über diese Adresse verbindet die Konsole (`APP_URL`) |
 | Portainer | https://neotokyo:9443 | LAN | Docker-Verwaltung; Port 8000 nur für Edge-Agents |
@@ -52,6 +53,7 @@ dem VPS), siehe „Pterodactyl“.
 | Komga | http://10.0.0.5:25600 | LAN + öffentlich | Manga/Comics/E-Books lesen, OPDS; von außen `https://books.<DOMAIN>`; siehe „Manga, Comics und News“ |
 | Suwayomi | http://10.0.0.5:4567 | LAN | lädt neue Manga-Kapitel, siehe „Manga, Comics und News“ |
 | Kapowarr | http://10.0.0.5:5656 | LAN | Comics von GetComics, `services/kapowarr.nix` |
+| Mylar3 | http://10.0.0.5:8092 | LAN | Comics über Prowlarr/SABnzbd/qBittorrent + GetComics, eigene Bibliothek `Comics-Mylar`, Vergleich zu Kapowarr, `services/mylar3.nix` |
 | FreshRSS | http://10.0.0.5:8097 | LAN + öffentlich | News-Reader; von außen `https://news.<DOMAIN>` |
 | Trakt-RSS + MAL-Sync | http://10.0.0.5:8098 | LAN | Trakt-Kalender als RSS, Abgleich Trakt/Komga → MyAnimeList |
 | RomM | http://10.0.0.5:8089 | LAN | ROM-Sammlung, Spielen im Browser; `containers/romm.nix` |
@@ -572,6 +574,7 @@ Fehlt eine Datei, startet der jeweilige Dienst nicht.
 
 - Samba-Passwörter: `sudo smbpasswd -a lmlzr` und `sudo smbpasswd -a dbglas`
 - Prefill: im LANCache Manager unter *Management → Schedules* (Steam-Login dort hinterlegen)
+- Cleanuparr (http://neotokyo:11011): Konto anlegen, dann qBittorrent `http://192.168.15.1:8080` (Login wie in Sonarr), Sonarr `http://localhost:8989` und Radarr `http://localhost:7878` (API-Keys) eintragen; Queue Cleaner mit Regeln für *Stalled* und *Downloading Metadata* einschalten.
 - Seerr (http://neotokyo:5055): beim ersten Aufruf „Jellyfin“ wählen, Server `http://localhost:8096`,
   mit dem Jellyfin-Admin anmelden. Danach unter *Settings → Services* Radarr (`http://localhost:7878`)
   und Sonarr (`http://localhost:8989`) mit deren API-Key (*Settings → General* in Radarr/Sonarr) eintragen.

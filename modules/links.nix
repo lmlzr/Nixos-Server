@@ -21,6 +21,8 @@ let
     "/var/lib/private/prowlarr"     = { enable = config.services.prowlarr.enable;       service = "prowlarr";       source = "${root}/prowlarr";       owner = "root:root"; };
     # Seerr (DynamicUser)
     "/var/lib/private/seerr"        = { enable = config.services.seerr.enable;          service = "seerr";          source = "${root}/seerr";          owner = "root:root"; };
+    # Cleanuparr (DynamicUser, eigene Unit in arr-stack/cleanuparr.nix, gehoert zum Arr-Stack wie Sonarr)
+    "/var/lib/private/cleanuparr"   = { enable = config.services.sonarr.enable;         service = "cleanuparr";     source = "${root}/cleanuparr";     owner = "root:root"; };
     "/var/lib/qBittorrent"          = { enable = config.services.qbittorrent.enable;    service = "qbittorrent";    source = "${root}/qbittorrent";    owner = "qbittorrent:media"; };
     # MariaDB (Datenbank des Pterodactyl-Panels)
     "/var/lib/mysql"                = { enable = config.services.mysql.enable;          service = "mysql";          source = "${root}/mysql";          owner = "mysql:mysql"; };

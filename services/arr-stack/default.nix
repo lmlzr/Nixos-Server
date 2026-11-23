@@ -9,6 +9,7 @@
     ./flaresolverr.nix
     ./qbittorrent.nix
     ./sabnzbd.nix
+    ./cleanuparr.nix
   ];
 
   # Gemeinsame Gruppe, damit Downloads, *arr und Jellyfin auf dieselben Dateien zugreifen.
