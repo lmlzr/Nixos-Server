@@ -60,7 +60,7 @@
       ./services/smb.nix
       #./services/mosquitto.nix
 
-      ./services/steam-lancache-prefill.nix
+      #./services/steam-lancache-prefill.nix  # abgeloest durch LANCache Manager Schedules (2026-11-23)
       ./services/iventoy.nix
       ./services/immich.nix
       ./services/arr-stack/default.nix

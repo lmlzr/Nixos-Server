@@ -4,8 +4,8 @@
 # fuer Steam, Epic, Battle.net, Riot und Xbox, von Hand oder nach Zeitplan.
 # https://github.com/regix1/lancache-manager  ->  http://10.0.0.5:8087 (nur im Heimnetz)
 #
-# Ersetzt seit 2026-11-09 das alte Dashboard (imahmud1/lancache-dashboard). SteamPrefill
-# (steam-lancache-prefill.nix, taeglich 04:00) laeuft noch parallel.
+# Ersetzt seit 2026-11-09 das alte Dashboard (imahmud1/lancache-dashboard). Steam-Prefill laeuft seit
+# 2026-11-23 nur noch ueber die Schedules hier (steam-lancache-prefill.nix ist nicht mehr importiert).
 #
 # Erster Aufruf: Einrichtungsseite (Datenbank-Passwort, Anmeldeart). Benutzer + Passwort waehlen,
 # NICHT "ohne Anmeldung": der Manager hat den Docker-Socket (= praktisch root auf neotokyo).

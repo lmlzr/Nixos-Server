@@ -35,7 +35,7 @@ in diesem Repo abgeglichen. Router (Proxmox, OPNsense, vmdocker) und VPS:
 | Medien | Jellyfin, Audiobookshelf, Immich (Fotos; mit Machine Learning, PostgreSQL, Redis) |
 | Arr-Stack | Sonarr, Radarr, Lidarr, Prowlarr, FlareSolverr, Seerr (Anfragen) |
 | Downloads | qBittorrent über Proton-VPN (eigener Netzwerk-Namespace, Port-Weiterleitung, Watchdog), SABnzbd |
-| Spiele | Pterodactyl Panel + Wings (Gameserver; nginx/PHP, MySQL, Redis), Lancache (Spiele-Download-Cache), SteamPrefill (täglich 04:00) |
+| Spiele | Pterodactyl Panel + Wings (Gameserver; nginx/PHP, MySQL, Redis), Lancache (Spiele-Download-Cache), Prefill über LANCache Manager (Steam/Epic/Battle.net-Schedules) |
 | Dateien / Netz | Samba (SMB-Freigaben), iVentoy (Netzwerk-Boot) |
 | Werkzeuge | Stirling-PDF, Glances (Systemwerte für Homepage), Checkmk-Agent (Überwachung) |
 

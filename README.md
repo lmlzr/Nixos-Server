@@ -110,7 +110,7 @@ Backup einspielen (Dienst vorher stoppen, Datei muss für `jellyfin` lesbar sein
 ## Lancache
 
 `services/lancache.nix` (nginx auf `10.0.0.5:80/443`, Cache in `tank/lancache`),
-`services/steam-lancache-prefill.nix` (SteamPrefill täglich ab 04:00, nur Updates nach dem ersten Lauf).
+Prefill (Steam, Epic, Battle.net) läuft über die Schedules im LANCache Manager (`containers/lancache-manager.nix`); `services/steam-lancache-prefill.nix` ist seit 2026-11-23 nicht mehr importiert.
 
 - **DNS (Pi-hole auf `10.0.0.3`):** die Spiele-Domains stehen dort in `misc.dnsmasq_lines` als
   `address=/<domain>/10.0.0.5`. Zu jeder Zeile gehört zusätzlich `local=/<domain>/`, sonst gibt
@@ -571,7 +571,7 @@ Fehlt eine Datei, startet der jeweilige Dienst nicht.
 ## Einmalige Einrichtung
 
 - Samba-Passwörter: `sudo smbpasswd -a lmlzr` und `sudo smbpasswd -a dbglas`
-- SteamPrefill: `cd /var/lib/steam-prefill && SteamPrefill select-apps`
+- Prefill: im LANCache Manager unter *Management → Schedules* (Steam-Login dort hinterlegen)
 - Seerr (http://neotokyo:5055): beim ersten Aufruf „Jellyfin“ wählen, Server `http://localhost:8096`,
   mit dem Jellyfin-Admin anmelden. Danach unter *Settings → Services* Radarr (`http://localhost:7878`)
   und Sonarr (`http://localhost:8989`) mit deren API-Key (*Settings → General* in Radarr/Sonarr) eintragen.
